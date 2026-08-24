@@ -1,0 +1,3 @@
+"use client";
+import Link from "next/link"; import {Icon} from "@/components/ui/Icon"; import {siteConfig} from "@/config/site";
+export function StudentSidebar(){return <aside className="dash-sidebar"><Link className="brand dash-brand" href="/"><span className="brand-mark">✦</span><span>{siteConfig.shortName}</span></Link><nav><Link className="active" href="/dashboard"><Icon name="home"/> Overview</Link><a><Icon name="calendar"/> My classes</a><a><Icon name="book"/> Programs</a><a><Icon name="wallet"/> Membership</a><a><Icon name="bell"/> Notifications <b>3</b></a></nav><div className="sidebar-bottom"><a><Icon name="settings"/> Settings</a><Link href="/"><Icon name="logout"/> Exit portal</Link></div></aside>}
