@@ -3,8 +3,8 @@ import "./globals.css";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: `${siteConfig.name} â€” ${siteConfig.tagline}`,
-  description: "Premium yoga classes, mindful movement and meditation.",
+  title: `${siteConfig.name} | ${siteConfig.tagline}`,
+  description: siteConfig.description,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

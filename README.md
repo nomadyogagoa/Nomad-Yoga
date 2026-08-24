@@ -1,6 +1,6 @@
-# Yoga School — Frontend UI (Phases 1–6)
+# Nomad Yoga — Frontend UI (Phases 1–6)
 
-A combined frontend-only implementation for the Yoga School platform. The brand name is intentionally centralized so it can be changed later without restructuring the project.
+A combined frontend-only implementation for the Nomad Yoga platform. The brand name is intentionally centralized so it can be changed later without restructuring the project.
 
 ## Included
 

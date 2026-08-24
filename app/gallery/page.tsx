@@ -1,2 +1,29 @@
-import {SiteShell} from "@/components/shared/SiteShell"; import {PageHero} from "@/components/shared/PageHero"; import {gallery} from "@/data/extended";
-export default function Gallery(){return <SiteShell><PageHero eyebrow="Inside the studio" title={<>Small moments. <em>Shared practice.</em></>} copy="A glimpse of daily movement, stillness and community at Yoga School." image="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=2000&q=88"/><section className="section"><div className="container gallery-grid">{gallery.map(([t,img],i)=><figure className={`gallery-item g${i+1}`} key={t} style={{backgroundImage:`url(${img})`}}><figcaption>{t}</figcaption></figure>)}</div></section></SiteShell>}
+import { SiteShell } from "@/components/shared/SiteShell";
+import { PageHero } from "@/components/shared/PageHero";
+import { gallery } from "@/data/extended";
+
+export default function Gallery() {
+  return (
+    <SiteShell>
+      <PageHero
+        eyebrow="Inside the studio"
+        title={
+          <>
+            Small moments. <em>Shared practice.</em>
+          </>
+        }
+        copy="A glimpse of daily movement, stillness and community at Nomad Yoga."
+        image="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=2000&q=88"
+      />
+      <section className="section">
+        <div className="container gallery-grid">
+          {gallery.map(([t, img], i) => (
+            <figure className={`gallery-item g${i + 1}`} key={t} style={{ backgroundImage: `url(${img})` }}>
+              <figcaption>{t}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+    </SiteShell>
+  );
+}

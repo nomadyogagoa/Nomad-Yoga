@@ -1,10 +1,10 @@
 export const siteConfig = {
-  name: "Yoga School",
-  shortName: "YOGA",
-  tagline: "Find your center. Ground your soul.",
-  description: "A premium yoga school experience for movement, mindfulness and community.",
+  name: "Nomad Yoga",
+  shortName: "NOMAD YOGA",
+  tagline: "Modern Yoga & Wellness",
+  description: "Nomad Yoga offers premium yoga classes, mindful movement and meditation.",
   phone: "+91 98765 43210",
-  email: "hello@yogaschool.example",
+  email: "hello@nomadyoga.example",
   address: "Wellness District, Your City, India",
 };
 
