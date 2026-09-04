@@ -1,4 +1,5 @@
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
+import { CountUp } from "@/components/ui/CountUp";
 import { featureFlags, siteConfig } from "@/config/site";
 
 export function Hero() {
@@ -26,15 +27,15 @@ export function Hero() {
         </div>
         <div className="hero-proof" aria-label="Nomad Yoga highlights">
           <div>
-            <strong>12+</strong>
+            <CountUp end={12} suffix="+" />
             <span>Years of practice</span>
           </div>
           <div>
-            <strong>450+</strong>
+            <CountUp end={450} suffix="+" />
             <span>Happy students</span>
           </div>
           <div>
-            <strong>25+</strong>
+            <CountUp end={25} suffix="+" />
             <span>Expert teachers</span>
           </div>
         </div>
