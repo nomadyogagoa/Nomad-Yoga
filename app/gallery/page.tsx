@@ -1,6 +1,8 @@
 import { SiteShell } from "@/components/shared/SiteShell";
 import { PageHero } from "@/components/shared/PageHero";
+import { Reveal } from "@/components/ui/Reveal";
 import { gallery } from "@/data/extended";
+import Image from "next/image";
 
 export default function Gallery() {
   return (
@@ -18,9 +20,10 @@ export default function Gallery() {
       <section className="section">
         <div className="container gallery-grid">
           {gallery.map(([t, img], i) => (
-            <figure className={`gallery-item g${i + 1}`} key={t} style={{ backgroundImage: `url(${img})` }}>
+            <Reveal as="figure" className={`gallery-item g${i + 1}`} key={t} delay={(i % 6) * 0.06}>
+              <Image src={img} alt={t} fill sizes="(max-width: 760px) 100vw, 40vw" />
               <figcaption>{t}</figcaption>
-            </figure>
+            </Reveal>
           ))}
         </div>
       </section>

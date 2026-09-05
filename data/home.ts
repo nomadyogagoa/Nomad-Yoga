@@ -25,6 +25,24 @@ export const practices = [
   },
 ];
 
+export const testimonials = [
+  {
+    quote: "I came for flexibility. I stayed because this became the one hour in my week where everything finally felt quiet.",
+    name: "Priya Mehta",
+    meta: "Member since 2024 · Mumbai",
+  },
+  {
+    quote: "Teaching here changed how I think about movement entirely — it's precise, unhurried, and genuinely rooted in care for the student.",
+    name: "Daniel Osei",
+    meta: "Member since 2023 · London",
+  },
+  {
+    quote: "I've practiced in studios across three continents. The attention to breath and alignment here is some of the most honest I've found.",
+    name: "Aiko Tanaka",
+    meta: "Member since 2025 · Tokyo",
+  },
+];
+
 export const schedule = [
   { time: "06:00 AM", className: "Hatha Yoga", instructor: "Anjali Sharma", level: "All levels" },
   { time: "07:30 AM", className: "Pranayama", instructor: "Rahul Verma", level: "Beginner" },

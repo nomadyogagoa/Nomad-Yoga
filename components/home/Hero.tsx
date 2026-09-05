@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { CountUp } from "@/components/ui/CountUp";
 import { featureFlags, siteConfig } from "@/config/site";
@@ -5,7 +6,15 @@ import { featureFlags, siteConfig } from "@/config/site";
 export function Hero() {
   return (
     <section className="hero" id="top">
-      <div className="hero-image" aria-hidden="true" />
+      <div className="hero-image" aria-hidden="true">
+        <Image
+          src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+        />
+      </div>
       <div className="hero-overlay" aria-hidden="true" />
       <div className="container hero-content">
         <p className="eyebrow">WELCOME TO {siteConfig.shortName}</p>
@@ -15,7 +24,7 @@ export function Hero() {
           <em>Live with balance.</em>
         </h1>
         <p className="hero-copy">
-          A modern sanctuary for mindful movement, conscious breath and sustainable wellbeing â€” guided by experienced teachers in a calm, supportive space.
+          A modern sanctuary for mindful movement, conscious breath and sustainable well being & guided by experienced teachers in a calm, supportive space.
         </p>
         <div className="hero-actions">
           {featureFlags.trialBooking && (

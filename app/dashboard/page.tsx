@@ -1,3 +1,43 @@
-import Link from "next/link"; import {StudentSidebar} from "@/components/dashboard/StudentSidebar"; import {Icon} from "@/components/ui/Icon";
-const upcoming=[['Today · 6:30 PM','Vinyasa Flow','Neha Kapoor'],['Thu · 7:00 AM','Hatha Yoga','Anjali Sharma'],['Sat · 8:30 AM','Meditation & Breathwork','Rahul Verma']];
-export default function Dashboard(){return <main className="dashboard-shell"><StudentSidebar/><section className="dash-main"><header className="dash-top"><div><p className="eyebrow">Member space</p><h1>Good afternoon, Aarav.</h1><p>Your next class starts in 3 hours. Give yourself a little room to arrive.</p></div><div className="avatar">AK</div></header><div className="stat-grid"><article><span><Icon name="calendar"/></span><div><strong>08</strong><p>Classes this month</p></div></article><article><span><Icon name="sparkles"/></span><div><strong>12</strong><p>Day practice streak</p></div></article><article><span><Icon name="clock"/></span><div><strong>18h</strong><p>Mindful minutes</p></div></article></div><div className="dash-grid"><section className="dash-card large"><div className="card-heading"><div><p className="eyebrow">Coming up</p><h2>Your classes</h2></div><button className="icon-button"><Icon name="plus"/></button></div><div className="upcoming-list">{upcoming.map(([t,n,teacher],i)=><article key={n} className={i===0?'next':''}><div className="date-dot">{i===0?'NOW':`0${i+4}`}</div><div><strong>{n}</strong><span>{t} · {teacher}</span></div><button>Manage</button></article>)}</div><Link className="text-link" href="/schedule">Explore full schedule →</Link></section><section className="dash-card practice-card-dash"><p className="eyebrow">This week</p><h2>Keep your rhythm.</h2><div className="ring"><strong>3</strong><span>/ 4 classes</span></div><p>You’re one practice away from your weekly intention.</p></section><section className="dash-card wide"><div className="card-heading"><div><p className="eyebrow">Current journey</p><h2>Hatha Foundations</h2></div><span className="soft-chip">68% complete</span></div><div className="progress"><i style={{width:'68%'}}/></div><div className="journey-meta"><span>8 of 12 sessions completed</span><button>Continue journey →</button></div></section><section className="dash-card"><p className="eyebrow">Membership</p><h2>Monthly Ritual</h2><p className="body-copy">Renews 18 Sep 2026</p><button className="button button-outline">Manage plan</button></section></div></section></main>}
+import Link from "next/link";
+import { MemberShell } from "@/components/member/MemberShell";
+import { Icon } from "@/components/ui/Icon";
+import { memberClasses, memberProfile, weeklyProgress } from "@/data/member";
+
+const upcomingClasses = memberClasses.slice(1, 4);
+const quickActions = [
+  { label: "Book Class", href: "/classes", icon: "plus" },
+  { label: "My Schedule", href: "/bookings", icon: "calendar" },
+  { label: "Membership", href: "/profile#membership", icon: "wallet" },
+  { label: "Notifications", href: "/notifications", icon: "bell", badge: "3" },
+] as const;
+
+export default function DashboardPage() {
+  const nextClass = memberClasses[0];
+  const progressPercent = Math.round((weeklyProgress.completedSessions / weeklyProgress.targetSessions) * 100);
+
+  return <MemberShell title={`Good morning, ${memberProfile.firstName}`} subtitle="A quiet moment to see what is ahead today.">
+    <div className="member-dashboard-grid">
+      <section className="member-next-practice" aria-labelledby="next-practice-title">
+        <div><p className="member-kicker member-kicker-light">Your next practice</p><h2 id="next-practice-title">{nextClass.title}</h2><div className="member-practice-meta"><strong>{nextClass.time}</strong><span>{nextClass.duration}</span><span>Instructor: {nextClass.instructor}</span></div></div>
+        <div className="member-practice-actions"><Link className="member-button member-button-light" href="/classes">View Class</Link><Link className="member-text-link member-text-link-light" href="/bookings">View Schedule <Icon name="arrow" size={16} /></Link></div>
+      </section>
+
+      <section className="member-progress-card" aria-labelledby="weekly-progress-title">
+        <div className="member-section-heading"><div><p className="member-kicker">This week</p><h2 id="weekly-progress-title">Weekly progress</h2></div><span>{weeklyProgress.streakDays} day streak</span></div>
+        <strong className="member-progress-score">{weeklyProgress.completedSessions} <small>/ {weeklyProgress.targetSessions} sessions</small></strong>
+        <div className="member-progress-track" role="progressbar" aria-label="Weekly sessions completed" aria-valuemin={0} aria-valuemax={weeklyProgress.targetSessions} aria-valuenow={weeklyProgress.completedSessions}><span style={{ width: `${progressPercent}%` }} /></div>
+        <p>One more practice completes your weekly intention.</p>
+      </section>
+
+      <section className="member-list-card member-upcoming-card" aria-labelledby="upcoming-title">
+        <div className="member-section-heading"><div><p className="member-kicker">Coming up</p><h2 id="upcoming-title">Upcoming classes</h2></div><Link href="/classes">View all</Link></div>
+        <div className="member-upcoming-list">{upcomingClasses.map((item) => <article key={item.id}><div><strong>{item.day}</strong><span>{item.date}</span></div><div><h3>{item.title}</h3><p>{item.instructor}</p></div><time>{item.time}</time></article>)}</div>
+      </section>
+
+      <section className="member-quick-card" aria-labelledby="quick-actions-title">
+        <div className="member-section-heading"><div><p className="member-kicker">Shortcuts</p><h2 id="quick-actions-title">Quick actions</h2></div></div>
+        <div className="member-quick-grid">{quickActions.map((action) => <Link key={action.label} href={action.href}><Icon name={action.icon} /><span>{action.label}</span>{"badge" in action ? <b aria-label={`${action.badge} unread`}>{action.badge}</b> : null}</Link>)}</div>
+      </section>
+    </div>
+  </MemberShell>;
+}

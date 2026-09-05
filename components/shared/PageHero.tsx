@@ -1,4 +1,6 @@
-import type { ReactNode, CSSProperties } from "react";
+import type { ReactNode } from "react";
+import Image from "next/image";
+import { Reveal } from "@/components/ui/Reveal";
 
 type PageHeroProps = {
   eyebrow: string;
@@ -9,13 +11,16 @@ type PageHeroProps = {
 
 export function PageHero({ eyebrow, title, copy, image }: PageHeroProps) {
   return (
-    <section className="page-hero" style={{ "--page-hero-image": `url(${image})` } as CSSProperties}>
+    <section className="page-hero">
+      <div className="page-hero-media" aria-hidden="true">
+        <Image src={image} alt="" fill priority sizes="100vw" />
+      </div>
       <div className="page-hero-shade" />
-      <div className="container page-hero-content">
+      <Reveal as="div" className="container page-hero-content">
         <p className="eyebrow eyebrow-light">{eyebrow}</p>
         <h1>{title}</h1>
         <p>{copy}</p>
-      </div>
+      </Reveal>
     </section>
   );
 }
