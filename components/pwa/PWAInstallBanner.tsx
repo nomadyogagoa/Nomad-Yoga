@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { AndroidInstallInstructions } from "@/components/pwa/AndroidInstallInstructions";
 import { IOSInstallInstructions } from "@/components/pwa/IOSInstallInstructions";
 import { usePWAInstallability } from "@/components/pwa/PWAInstallabilityProvider";
 import { usePWAUpdate } from "@/components/pwa/ServiceWorkerRegistration";
@@ -41,26 +42,32 @@ export function PWAInstallBanner() {
     isInstalled,
     isStandalone,
     canPromptInstall,
+    isChromeAndroid,
     needsManualIOSInstall,
+    needsManualAndroidInstall,
     installationCompleted,
     isInstalling,
     requestInstall,
   } = usePWAInstallability();
   const [isVisible, setIsVisible] = useState(false);
   const [isIOSInstructionsOpen, setIsIOSInstructionsOpen] = useState(false);
+  const [isAndroidInstructionsOpen, setIsAndroidInstructionsOpen] = useState(false);
   const [iosInstructionsSeen, setIOSInstructionsSeen] = useState(false);
+  const [androidInstructionsSeen, setAndroidInstructionsSeen] = useState(false);
 
   useEffect(() => {
     setIsVisible(false);
 
     if (updateAvailable || isExcludedRoute(pathname) || isInstalled || isStandalone || installationCompleted) {
       setIsIOSInstructionsOpen(false);
+      setIsAndroidInstructionsOpen(false);
       return;
     }
 
     const isEligible =
-      (canPromptInstall || needsManualIOSInstall) &&
+      (canPromptInstall || needsManualIOSInstall || needsManualAndroidInstall) &&
       !iosInstructionsSeen &&
+      !androidInstructionsSeen &&
       !isExcludedRoute(pathname);
 
     if (!isEligible || wasDismissedRecently()) return;
@@ -69,14 +76,22 @@ export function PWAInstallBanner() {
     return () => window.clearTimeout(timeout);
   }, [
     canPromptInstall,
+    androidInstructionsSeen,
     installationCompleted,
     iosInstructionsSeen,
     isInstalled,
     isStandalone,
     needsManualIOSInstall,
+    needsManualAndroidInstall,
     pathname,
     updateAvailable,
   ]);
+
+  useEffect(() => {
+    if (!canPromptInstall || !isAndroidInstructionsOpen) return;
+    setIsAndroidInstructionsOpen(false);
+    setAndroidInstructionsSeen(false);
+  }, [canPromptInstall, isAndroidInstructionsOpen]);
 
   const dismiss = () => {
     setIsVisible(false);
@@ -95,6 +110,13 @@ export function PWAInstallBanner() {
       return;
     }
 
+    if (needsManualAndroidInstall) {
+      setIsVisible(false);
+      setAndroidInstructionsSeen(true);
+      setIsAndroidInstructionsOpen(true);
+      return;
+    }
+
     if (!canPromptInstall) {
       setIsVisible(false);
       return;
@@ -105,7 +127,7 @@ export function PWAInstallBanner() {
     if (outcome === "unavailable") setIsVisible(false);
   };
 
-  if (updateAvailable || (!isVisible && !isIOSInstructionsOpen)) return null;
+  if (updateAvailable || (!isVisible && !isIOSInstructionsOpen && !isAndroidInstructionsOpen)) return null;
 
   return (
     <>
@@ -152,6 +174,11 @@ export function PWAInstallBanner() {
       <IOSInstallInstructions
         isOpen={isIOSInstructionsOpen}
         onClose={() => setIsIOSInstructionsOpen(false)}
+      />
+      <AndroidInstallInstructions
+        isOpen={isAndroidInstructionsOpen}
+        isChromeAndroid={isChromeAndroid}
+        onClose={() => setIsAndroidInstructionsOpen(false)}
       />
     </>
   );

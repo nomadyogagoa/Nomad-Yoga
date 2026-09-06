@@ -405,6 +405,7 @@ a,button { transition: color .25s ease, background .25s ease, border-color .25s 
 .ios-install-close:hover{background:var(--sage-soft)}
 .ios-install-heading{padding-right:48px}
 .ios-install-heading>.pwa-install-mark{margin-bottom:18px}
+.android-install-app-icon{display:block;width:52px;height:52px;margin-bottom:18px;border-radius:14px;box-shadow:0 8px 20px rgba(49,64,46,.13)}
 .ios-install-heading .eyebrow{margin-bottom:12px}
 .ios-install-heading h2{margin:0 0 10px;color:var(--sage-dark);font-size:38px;line-height:1.05}
 .ios-install-heading>p:last-child{margin:0;color:var(--muted);font-size:14px}

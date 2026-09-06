@@ -34,8 +34,10 @@ export interface PWAInstallabilityState {
   canPromptInstall: boolean;
   isIOS: boolean;
   isAndroid: boolean;
+  isChromeAndroid: boolean;
   isMobile: boolean;
   needsManualIOSInstall: boolean;
+  needsManualAndroidInstall: boolean;
   installationCompleted: boolean;
   isInstalling: boolean;
   lastInstallOutcome: InstallOutcome | null;
@@ -54,7 +56,12 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
   const [installationCompleted, setInstallationCompleted] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
   const [lastInstallOutcome, setLastInstallOutcome] = useState<InstallOutcome | null>(null);
-  const [platform, setPlatform] = useState({ isIOS: false, isAndroid: false, isMobile: false });
+  const [platform, setPlatform] = useState({
+    isIOS: false,
+    isAndroid: false,
+    isChromeAndroid: false,
+    isMobile: false,
+  });
 
   useEffect(() => {
     const navigatorWithContext = navigator as NavigatorWithInstallContext;
@@ -79,11 +86,15 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
     const isIPadOS = /Macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1;
     const isIOS = /iPad|iPhone|iPod/i.test(userAgent) || isIPadOS;
     const isAndroid = /Android/i.test(userAgent);
+    const isChromeAndroid =
+      isAndroid &&
+      /Chrome\/\d+/i.test(userAgent) &&
+      !/(?:EdgA|OPR|SamsungBrowser|UCBrowser|DuckDuckGo|YaBrowser)\//i.test(userAgent);
     const isMobile =
       navigatorWithContext.userAgentData?.mobile ??
       (isIOS || isAndroid || window.matchMedia("(pointer: coarse)").matches);
 
-    setPlatform({ isIOS, isAndroid, isMobile });
+    setPlatform({ isIOS, isAndroid, isChromeAndroid, isMobile });
     updateStandaloneMode();
 
     const handleBeforeInstallPrompt = (event: DeferredInstallPromptEvent) => {
@@ -151,7 +162,7 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
   }, []);
 
   const isInstalled = isStandalone || installationCompleted;
-  const canPromptInstall = installPromptAvailable && !isInstalled;
+  const canPromptInstall = installPromptAvailable && !isInstalled && !platform.isIOS;
   const value = useMemo<PWAInstallabilityState>(
     () => ({
       isInstalled,
@@ -159,8 +170,11 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
       canPromptInstall,
       isIOS: platform.isIOS,
       isAndroid: platform.isAndroid,
+      isChromeAndroid: platform.isChromeAndroid,
       isMobile: platform.isMobile,
-      needsManualIOSInstall: platform.isIOS && !isInstalled && !canPromptInstall,
+      needsManualIOSInstall: platform.isIOS && !isInstalled,
+      needsManualAndroidInstall:
+        platform.isAndroid && platform.isMobile && !isInstalled && !canPromptInstall,
       installationCompleted,
       isInstalling,
       lastInstallOutcome,
