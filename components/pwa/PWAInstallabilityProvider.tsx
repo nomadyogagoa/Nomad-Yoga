@@ -174,7 +174,7 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
       isMobile: platform.isMobile,
       needsManualIOSInstall: platform.isIOS && !isInstalled,
       needsManualAndroidInstall:
-        platform.isAndroid && platform.isMobile && !isInstalled && !canPromptInstall,
+        platform.isAndroid && !isInstalled && !canPromptInstall,
       installationCompleted,
       isInstalling,
       lastInstallOutcome,
@@ -191,6 +191,20 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
       requestInstall,
     ]
   );
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+
+    console.debug("[Nomad Yoga PWA] installability", {
+      isAndroid: value.isAndroid,
+      isMobile: value.isMobile,
+      isInstalled: value.isInstalled,
+      isStandalone: value.isStandalone,
+      canPromptInstall: value.canPromptInstall,
+      needsManualAndroidInstall: value.needsManualAndroidInstall,
+      installationCompleted: value.installationCompleted,
+    });
+  }, [value]);
 
   return <PWAInstallabilityContext.Provider value={value}>{children}</PWAInstallabilityContext.Provider>;
 }

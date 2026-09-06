@@ -29,7 +29,8 @@ function isExcludedRoute(pathname: string) {
 function wasDismissedRecently() {
   try {
     const dismissedAt = Number(window.localStorage.getItem(DISMISSAL_KEY));
-    return Number.isFinite(dismissedAt) && dismissedAt > 0 && Date.now() - dismissedAt < DISMISSAL_COOLDOWN_MS;
+    const elapsed = Date.now() - dismissedAt;
+    return Number.isFinite(dismissedAt) && dismissedAt > 0 && elapsed >= 0 && elapsed < DISMISSAL_COOLDOWN_MS;
   } catch {
     return false;
   }
@@ -42,7 +43,9 @@ export function PWAInstallBanner() {
     isInstalled,
     isStandalone,
     canPromptInstall,
+    isAndroid,
     isChromeAndroid,
+    isMobile,
     needsManualIOSInstall,
     needsManualAndroidInstall,
     installationCompleted,
@@ -54,23 +57,26 @@ export function PWAInstallBanner() {
   const [isAndroidInstructionsOpen, setIsAndroidInstructionsOpen] = useState(false);
   const [iosInstructionsSeen, setIOSInstructionsSeen] = useState(false);
   const [androidInstructionsSeen, setAndroidInstructionsSeen] = useState(false);
+  const [dismissalCooldownActive, setDismissalCooldownActive] = useState(false);
+  const routeSuppressed = isExcludedRoute(pathname);
 
   useEffect(() => {
     setIsVisible(false);
+    const cooldownActive = wasDismissedRecently();
+    setDismissalCooldownActive(cooldownActive);
 
-    if (updateAvailable || isExcludedRoute(pathname) || isInstalled || isStandalone || installationCompleted) {
+    if (updateAvailable || routeSuppressed || isInstalled || isStandalone || installationCompleted) {
       setIsIOSInstructionsOpen(false);
       setIsAndroidInstructionsOpen(false);
       return;
     }
 
     const isEligible =
-      (canPromptInstall || needsManualIOSInstall || needsManualAndroidInstall) &&
+      (isAndroid || canPromptInstall || needsManualIOSInstall) &&
       !iosInstructionsSeen &&
-      !androidInstructionsSeen &&
-      !isExcludedRoute(pathname);
+      !androidInstructionsSeen;
 
-    if (!isEligible || wasDismissedRecently()) return;
+    if (!isEligible || cooldownActive) return;
 
     const timeout = window.setTimeout(() => setIsVisible(true), SHOW_DELAY_MS);
     return () => window.clearTimeout(timeout);
@@ -78,12 +84,41 @@ export function PWAInstallBanner() {
     canPromptInstall,
     androidInstructionsSeen,
     installationCompleted,
+    isAndroid,
     iosInstructionsSeen,
     isInstalled,
     isStandalone,
     needsManualIOSInstall,
-    needsManualAndroidInstall,
     pathname,
+    routeSuppressed,
+    updateAvailable,
+  ]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+
+    console.debug("[Nomad Yoga PWA] install promotion", {
+      isAndroid,
+      isMobile,
+      isInstalled,
+      isStandalone,
+      canPromptInstall,
+      needsManualAndroidInstall,
+      installationCompleted,
+      routeSuppressed,
+      dismissalCooldownActive,
+      updateAvailable,
+    });
+  }, [
+    canPromptInstall,
+    dismissalCooldownActive,
+    installationCompleted,
+    isAndroid,
+    isInstalled,
+    isMobile,
+    isStandalone,
+    needsManualAndroidInstall,
+    routeSuppressed,
     updateAvailable,
   ]);
 
@@ -95,6 +130,7 @@ export function PWAInstallBanner() {
 
   const dismiss = () => {
     setIsVisible(false);
+    setDismissalCooldownActive(true);
     try {
       window.localStorage.setItem(DISMISSAL_KEY, String(Date.now()));
     } catch {
