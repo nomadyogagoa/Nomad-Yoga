@@ -7,8 +7,7 @@ import { IOSInstallInstructions } from "@/components/pwa/IOSInstallInstructions"
 import { usePWAInstallability } from "@/components/pwa/PWAInstallabilityProvider";
 import { usePWAUpdate } from "@/components/pwa/ServiceWorkerRegistration";
 
-const DISMISSAL_KEY = "nomad-yoga-install-dismissed-at";
-const DISMISSAL_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
+const OBSOLETE_DISMISSAL_KEY = "nomad-yoga-install-dismissed-at";
 const SHOW_DELAY_MS = 4500;
 const EXCLUDED_ROUTES = [
   "/admin",
@@ -24,16 +23,6 @@ const EXCLUDED_ROUTES = [
 
 function isExcludedRoute(pathname: string) {
   return EXCLUDED_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
-}
-
-function wasDismissedRecently() {
-  try {
-    const dismissedAt = Number(window.localStorage.getItem(DISMISSAL_KEY));
-    const elapsed = Date.now() - dismissedAt;
-    return Number.isFinite(dismissedAt) && dismissedAt > 0 && elapsed >= 0 && elapsed < DISMISSAL_COOLDOWN_MS;
-  } catch {
-    return false;
-  }
 }
 
 export function PWAInstallBanner() {
@@ -57,13 +46,19 @@ export function PWAInstallBanner() {
   const [isAndroidInstructionsOpen, setIsAndroidInstructionsOpen] = useState(false);
   const [iosInstructionsSeen, setIOSInstructionsSeen] = useState(false);
   const [androidInstructionsSeen, setAndroidInstructionsSeen] = useState(false);
-  const [dismissalCooldownActive, setDismissalCooldownActive] = useState(false);
+  const [dismissedForCurrentSession, setDismissedForCurrentSession] = useState(false);
   const routeSuppressed = isExcludedRoute(pathname);
 
   useEffect(() => {
+    try {
+      window.localStorage.removeItem(OBSOLETE_DISMISSAL_KEY);
+    } catch {
+      // Storage availability does not affect the in-memory dismissal.
+    }
+  }, []);
+
+  useEffect(() => {
     setIsVisible(false);
-    const cooldownActive = wasDismissedRecently();
-    setDismissalCooldownActive(cooldownActive);
 
     if (updateAvailable || routeSuppressed || isInstalled || isStandalone || installationCompleted) {
       setIsIOSInstructionsOpen(false);
@@ -74,15 +69,17 @@ export function PWAInstallBanner() {
     const isEligible =
       (isAndroid || canPromptInstall || needsManualIOSInstall) &&
       !iosInstructionsSeen &&
-      !androidInstructionsSeen;
+      !androidInstructionsSeen &&
+      !dismissedForCurrentSession;
 
-    if (!isEligible || cooldownActive) return;
+    if (!isEligible) return;
 
     const timeout = window.setTimeout(() => setIsVisible(true), SHOW_DELAY_MS);
     return () => window.clearTimeout(timeout);
   }, [
     canPromptInstall,
     androidInstructionsSeen,
+    dismissedForCurrentSession,
     installationCompleted,
     isAndroid,
     iosInstructionsSeen,
@@ -106,12 +103,12 @@ export function PWAInstallBanner() {
       needsManualAndroidInstall,
       installationCompleted,
       routeSuppressed,
-      dismissalCooldownActive,
+      dismissedForCurrentSession,
       updateAvailable,
     });
   }, [
     canPromptInstall,
-    dismissalCooldownActive,
+    dismissedForCurrentSession,
     installationCompleted,
     isAndroid,
     isInstalled,
@@ -130,12 +127,7 @@ export function PWAInstallBanner() {
 
   const dismiss = () => {
     setIsVisible(false);
-    setDismissalCooldownActive(true);
-    try {
-      window.localStorage.setItem(DISMISSAL_KEY, String(Date.now()));
-    } catch {
-      // The in-memory dismissal still applies when storage is unavailable.
-    }
+    setDismissedForCurrentSession(true);
   };
 
   const handleInstall = async () => {
