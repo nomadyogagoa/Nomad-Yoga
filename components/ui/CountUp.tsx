@@ -11,7 +11,6 @@ type CountUpProps = {
 export function CountUp({ end, suffix = "", duration = 1600 }: CountUpProps) {
   const [value, setValue] = useState(0);
   const elementRef = useRef<HTMLElement | null>(null);
-  const hasStarted = useRef(false);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -23,11 +22,12 @@ export function CountUp({ end, suffix = "", duration = 1600 }: CountUpProps) {
       return;
     }
 
-    let frameId = 0;
+    let frameId: number | null = null;
+    let hasStarted = false;
 
     const startCounting = () => {
-      if (hasStarted.current) return;
-      hasStarted.current = true;
+      if (hasStarted) return;
+      hasStarted = true;
       const startedAt = performance.now();
 
       const update = (now: number) => {
@@ -35,7 +35,11 @@ export function CountUp({ end, suffix = "", duration = 1600 }: CountUpProps) {
         const easedProgress = 1 - Math.pow(1 - progress, 3);
         setValue(Math.round(end * easedProgress));
 
-        if (progress < 1) frameId = requestAnimationFrame(update);
+        if (progress < 1) {
+          frameId = requestAnimationFrame(update);
+        } else {
+          setValue(end);
+        }
       };
 
       frameId = requestAnimationFrame(update);
@@ -43,7 +47,9 @@ export function CountUp({ end, suffix = "", duration = 1600 }: CountUpProps) {
 
     if (!("IntersectionObserver" in window)) {
       startCounting();
-      return () => cancelAnimationFrame(frameId);
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
 
     const observer = new IntersectionObserver(
@@ -53,14 +59,14 @@ export function CountUp({ end, suffix = "", duration = 1600 }: CountUpProps) {
           observer.disconnect();
         }
       },
-      { threshold: 0.35 }
+      { threshold: 0.15 }
     );
 
     observer.observe(element);
 
     return () => {
       observer.disconnect();
-      cancelAnimationFrame(frameId);
+      if (frameId !== null) cancelAnimationFrame(frameId);
     };
   }, [duration, end]);
 
