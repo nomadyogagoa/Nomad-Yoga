@@ -1,37 +1,30 @@
-# Nomad Yoga — Frontend UI (Phases 1–6)
+# Nomad Yoga
 
-A combined frontend-only implementation for the Nomad Yoga platform. The brand name is intentionally centralized so it can be changed later without restructuring the project.
+Nomad Yoga is organized as two independent applications:
 
-## Included
+- `frontend/` — Next.js web application, deployed through Vercel.
+- `backend/` — NestJS API with Prisma and PostgreSQL.
 
-- Phase 1: Home landing page and premium design system
-- Phase 2: About, Programs, Program Details, Schedule, Instructors, Instructor Details
-- Phase 3: Pricing, Contact, Gallery, Journal/Blog, Login, Registration
-- Phase 4: Student Dashboard UI
-- Phase 5: Admin Dashboard UI, CMS content editor, Students, Programs, Payments, Notifications, Media Library, Settings and feature visibility
-- Phase 6: Responsive behavior, accessibility focus states, reduced-motion support, UI consistency and polish
+## Development
 
-## Run
+### Frontend
 
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+### Backend
 
-## Key routes
+```bash
+cd backend
+npm install
+npm run start:dev
+```
 
-Public: `/`, `/about`, `/programs`, `/schedule`, `/instructors`, `/pricing`, `/gallery`, `/blog`, `/contact`
+Database schema and Prisma commands are managed from `backend/prisma`. Do not create or apply migrations until a confirmed safe development PostgreSQL connection is available.
 
-Auth: `/login`, `/register`
+## Vercel
 
-Student: `/dashboard`
-
-Admin: `/admin`, `/admin/content`, `/admin/programs`, `/admin/students`, `/admin/payments`, `/admin/notifications`, `/admin/gallery`, `/admin/settings`
-
-## Important
-
-This is UI-only. Buttons/forms are visual flows and do not persist data yet. Backend, authentication, payment gateway, email, SMS and WhatsApp integrations are intentionally deferred to the backend phase.
-
-Change branding and feature flags in `config/site.ts`.
+Set the Vercel project's **Settings → Build & Deployment → Root Directory** to `frontend`. This lets Vercel discover the Next.js package and build configuration after the repository reorganization.
