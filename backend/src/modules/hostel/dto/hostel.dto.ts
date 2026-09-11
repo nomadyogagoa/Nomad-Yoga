@@ -1,0 +1,26 @@
+import { Type } from 'class-transformer';
+import { ArrayMaxSize, IsArray, IsBoolean, IsDateString, IsDecimal, IsEmail, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Length, Matches, Max, Min, ValidateNested } from 'class-validator';
+import { HostelBookingStatus } from '@prisma/client';
+import { PaginationDto } from '../../../common/pagination/pagination.dto';
+
+export class StayDto { @IsDateString() checkIn!: string; @IsDateString() checkOut!: string; @Type(() => Number) @IsInt() @Min(1) adults = 1; @Type(() => Number) @IsInt() @Min(0) children = 0; @IsOptional() @IsString() roomTypeId?: string; }
+export class QuoteDto extends StayDto { @IsString() declare roomTypeId: string; @Type(() => Number) @IsInt() @Min(1) quantity = 1; }
+export class BookingGuestDto { @IsString() @IsNotEmpty() @Length(1, 100) firstName!: string; @IsString() @IsNotEmpty() @Length(1, 100) lastName!: string; @IsOptional() @IsEmail() email?: string; @IsOptional() @IsString() @Length(3, 30) phone?: string; }
+export class CreateBookingDto extends QuoteDto { @IsString() hostelId!: string; @IsEmail() contactEmail!: string; @IsString() @Length(3, 30) contactPhone!: string; @IsOptional() @IsString() @Length(1, 2000) specialRequests?: string; @IsArray() @ArrayMaxSize(100) @ValidateNested({ each: true }) @Type(() => BookingGuestDto) guests!: BookingGuestDto[]; }
+export class BookingQueryDto extends PaginationDto { @IsOptional() @IsEnum(HostelBookingStatus) status?: HostelBookingStatus; @IsOptional() @IsBoolean() @Type(() => Boolean) upcoming?: boolean; }
+export class CreateHostelDto { @IsString() @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/) slug!: string; @IsString() @Length(1, 160) name!: string; @IsOptional() @IsString() description?: string; @IsOptional() @IsString() address?: string; @IsOptional() @IsString() city?: string; @IsOptional() @IsString() country?: string; }
+export class UpdateHostelDto { @IsOptional() @IsString() @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/) slug?: string; @IsOptional() @IsString() @Length(1, 160) name?: string; @IsOptional() @IsString() description?: string; @IsOptional() @IsString() address?: string; @IsOptional() @IsString() city?: string; @IsOptional() @IsString() country?: string; }
+export class CreateRoomTypeDto { @IsString() @Length(1, 100) name!: string; @IsOptional() @IsString() description?: string; @IsBoolean() isPrivate!: boolean; @Type(() => Number) @IsInt() @Min(1) capacity!: number; @IsDecimal({ decimal_digits: '0,2', force_decimal: false }) basePrice!: string; @IsOptional() @Matches(/^[A-Z]{3}$/) currency = 'INR'; }
+export class UpdateRoomTypeDto { @IsOptional() @IsString() @Length(1, 100) name?: string; @IsOptional() @IsString() description?: string; @IsOptional() @IsBoolean() isPrivate?: boolean; @IsOptional() @Type(() => Number) @IsInt() @Min(1) capacity?: number; @IsOptional() @IsDecimal({ decimal_digits: '0,2', force_decimal: false }) basePrice?: string; @IsOptional() @Matches(/^[A-Z]{3}$/) currency?: string; }
+export class CreateRoomDto { @IsString() @Length(1, 100) name!: string; @IsString() @Length(1, 50) roomNumber!: string; }
+export class UpdateRoomDto { @IsOptional() @IsString() @Length(1, 100) name?: string; @IsOptional() @IsString() @Length(1, 50) roomNumber?: string; }
+export class CreateBedDto { @IsString() @Length(1, 50) label!: string; }
+export class UpdateBedDto extends CreateBedDto {}
+export class AmenityDto { @IsString() @Length(1, 100) name!: string; }
+export class AmenityAssignmentDto { @IsArray() @ArrayMaxSize(100) @IsString({ each: true }) amenityIds!: string[]; }
+export class RoomImageDto { @IsString() @Matches(/^https?:\/\//) url!: string; @IsOptional() @IsString() @Length(1, 250) altText?: string; @IsOptional() @Type(() => Number) @IsInt() @Min(0) sortOrder?: number; }
+export class UpdateRoomImageDto { @IsOptional() @IsString() @Matches(/^https?:\/\//) url?: string; @IsOptional() @IsString() @Length(1, 250) altText?: string; @IsOptional() @Type(() => Number) @IsInt() @Min(0) sortOrder?: number; }
+export class PriceRuleDto { @IsString() @Length(1, 100) name!: string; @IsDateString() startsOn!: string; @IsDateString() endsOn!: string; @IsDecimal({ decimal_digits: '0,2', force_decimal: false }) nightlyRate!: string; @IsOptional() @Type(() => Number) @IsInt() @Min(1) minNights?: number; }
+export class UpdatePriceRuleDto { @IsOptional() @IsString() @Length(1, 100) name?: string; @IsOptional() @IsDateString() startsOn?: string; @IsOptional() @IsDateString() endsOn?: string; @IsOptional() @IsDecimal({ decimal_digits: '0,2', force_decimal: false }) nightlyRate?: string; @IsOptional() @Type(() => Number) @IsInt() @Min(1) minNights?: number; }
+export class AdminBookingQueryDto extends PaginationDto { @IsOptional() @IsEnum(HostelBookingStatus) status?: HostelBookingStatus; @IsOptional() @IsString() hostelId?: string; @IsOptional() @IsString() roomTypeId?: string; @IsOptional() @IsDateString() checkInFrom?: string; @IsOptional() @IsDateString() checkInTo?: string; @IsOptional() @IsDateString() createdFrom?: string; @IsOptional() @IsDateString() createdTo?: string; @IsOptional() @IsString() search?: string; }
+export class UpdateBookingStatusDto { @IsEnum(HostelBookingStatus) status!: HostelBookingStatus; }

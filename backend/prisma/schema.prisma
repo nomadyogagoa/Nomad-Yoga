@@ -11,10 +11,11 @@ enum UserStatus {
   ACTIVE
   INVITED
   SUSPENDED
+  DISABLED
 }
 
 enum RoleName {
-  STUDENT
+  USER
   INSTRUCTOR
   ADMIN
   SUPER_ADMIN
@@ -64,7 +65,10 @@ enum HostelBookingStatus {
 }
 
 enum PaymentStatus {
+  CREATED
   PENDING
+  AUTHORIZED
+  CAPTURED
   SUCCEEDED
   FAILED
   CANCELLED
@@ -86,7 +90,7 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
-  REFUNDED
+  RETURNED
 }
 
 enum ProductStatus {
@@ -129,6 +133,7 @@ model User {
   passwordHash           String?
   emailVerifiedAt        DateTime?
   status                 UserStatus              @default(INVITED)
+  lastLoginAt            DateTime?
   profile                UserProfile?
   roles                  UserRole[]
   refreshTokens          RefreshToken[]
@@ -159,7 +164,10 @@ model UserProfile {
   firstName      String
   lastName       String
   phone          String?
+  countryCode    String?
+  city           String?
   avatarUrl      String?
+  bio            String?   @db.Text
   dateOfBirth    DateTime? @db.Date
   emergencyName  String?
   emergencyPhone String?
@@ -191,13 +199,16 @@ model UserRole {
 }
 
 model RefreshToken {
-  id        String    @id @default(cuid())
-  userId    String
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime  @default(now())
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  deviceName String?
+  userAgent  String?
+  ipAddress  String?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
 
   @@index([userId])
   @@index([expiresAt])

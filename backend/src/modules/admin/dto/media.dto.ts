@@ -1,0 +1,3 @@
+import { IsInt, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator';
+export class CreateMediaDto { @IsString() @MaxLength(500) storageKey!: string; @IsUrl() @MaxLength(2048) url!: string; @IsString() @MaxLength(255) mimeType!: string; @IsInt() @Min(0) sizeBytes!: number; @IsOptional() @IsInt() @Min(1) @Max(100000) width?: number; @IsOptional() @IsInt() @Min(1) @Max(100000) height?: number; @IsOptional() @IsString() @MaxLength(500) altText?: string; }
+export class UpdateMediaDto { @IsOptional() @IsUrl() @MaxLength(2048) url?: string; @IsOptional() @IsString() @MaxLength(500) altText?: string; }

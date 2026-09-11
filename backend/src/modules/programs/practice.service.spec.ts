@@ -1,0 +1,2 @@
+import { PracticeService } from './practice.service';
+describe('PracticeService',()=>{it('derives totals and calendar-day streaks in UTC',async()=>{const p:any={practiceSession:{findMany:jest.fn().mockResolvedValue([{startedAt:new Date(),durationMinutes:30},{startedAt:new Date(),durationMinutes:15}])}};const out=await new PracticeService(p).progress('u');expect(out.totalPracticeMinutes).toBe(45);expect(out.currentStreak).toBe(1);expect(out.longestStreak).toBe(1)});});

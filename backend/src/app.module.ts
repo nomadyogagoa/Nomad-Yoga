@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BlogModule } from './modules/blog/blog.module';
@@ -18,10 +19,12 @@ import { UsersModule } from './modules/users/users.module';
 import { validateEnvironment } from './config/environment.validation';
 import { PrismaModule } from './database/prisma.module';
 import { HealthModule } from './health/health.module';
+import { AuditModule } from './common/audit/audit.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnvironment }),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]), AuditModule,
     PrismaModule, HealthModule, AuthModule, UsersModule, InstructorsModule, ProgramsModule, PracticeModule,
     HostelModule, StoreModule, PaymentsModule, BlogModule, NewsletterModule, ContactModule, NotificationsModule,
     MembershipsModule, ContentModule, AdminModule,

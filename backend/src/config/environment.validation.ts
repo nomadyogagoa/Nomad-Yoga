@@ -25,6 +25,42 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   } catch {
     throw new Error('FRONTEND_URL must be a valid URL.');
   }
+  if (config.FRONTEND_URLS !== undefined && config.FRONTEND_URLS !== '') {
+    const origins = String(config.FRONTEND_URLS).split(',').map((origin) => origin.trim()).filter(Boolean);
+    if (!origins.length) throw new Error('FRONTEND_URLS must contain at least one URL.');
+    for (const origin of origins) { try { new URL(origin); } catch { throw new Error('FRONTEND_URLS must be a comma-separated list of valid URLs.'); } }
+  }
+
+  const jwtSecret = config.JWT_ACCESS_SECRET;
+  if (typeof jwtSecret !== 'string' || jwtSecret.trim().length < 32) {
+    throw new Error('JWT_ACCESS_SECRET must be at least 32 characters.');
+  }
+  if (nodeEnv === 'production' && /change|example|secret/i.test(jwtSecret)) {
+    throw new Error('JWT_ACCESS_SECRET must not be a default or example value in production.');
+  }
+  for (const key of ['REFRESH_TOKEN_EXPIRES_DAYS', 'EMAIL_VERIFICATION_EXPIRES_MINUTES', 'PASSWORD_RESET_EXPIRES_MINUTES']) {
+    const value = Number(config[key] ?? (key === 'REFRESH_TOKEN_EXPIRES_DAYS' ? 30 : 60));
+    if (!Number.isInteger(value) || value < 1 || value > 365) throw new Error(`${key} must be a whole number between 1 and 365.`);
+    config[key] = value;
+  }
+  if (config.SMTP_PORT !== undefined && config.SMTP_PORT !== '') {
+    const smtpPort = Number(config.SMTP_PORT);
+    if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535) throw new Error('SMTP_PORT must be a valid port number.');
+    config.SMTP_PORT = smtpPort;
+  }
+  const emailProvider = config.EMAIL_PROVIDER ?? 'resend';
+  if (emailProvider !== 'resend' && emailProvider !== 'smtp') throw new Error('EMAIL_PROVIDER must be resend or smtp.');
+  config.EMAIL_PROVIDER = emailProvider;
+  if (config.SMTP_SECURE !== undefined && config.SMTP_SECURE !== '') {
+    if (!['true', 'false', true, false].includes(config.SMTP_SECURE as never)) throw new Error('SMTP_SECURE must be true or false.');
+    config.SMTP_SECURE = config.SMTP_SECURE === true || config.SMTP_SECURE === 'true';
+  }
+  const gateway = config.PAYMENT_GATEWAY ?? 'cashfree';
+  if (gateway !== 'cashfree' && gateway !== 'stripe') throw new Error('PAYMENT_GATEWAY must be cashfree or stripe.');
+  config.PAYMENT_GATEWAY = gateway;
+  for (const key of ['PAYMENT_SUCCESS_URL', 'PAYMENT_CANCEL_URL']) {
+    if (config[key] !== undefined && config[key] !== '') { try { new URL(String(config[key])); } catch { throw new Error(`${key} must be a valid URL.`); } }
+  }
 
   return { ...config, NODE_ENV: nodeEnv, PORT: port };
 }
