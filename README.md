@@ -1,6 +1,6 @@
 # Nomad Yoga
 
-Nomad Yoga is organized as two independent applications:
+Nomad Yoga began eight years ago in Krakow, Poland, as a community-centered movement and nature project. It is now organized as two independent applications:
 
 - `frontend/` — Next.js web application, deployed through Vercel.
 - `backend/` — NestJS API with Prisma and PostgreSQL.
@@ -27,4 +27,4 @@ Database schema and Prisma commands are managed from `backend/prisma`. Do not cr
 
 ## Vercel
 
-Set the Vercel project's **Settings → Build & Deployment → Root Directory** to `frontend`. This lets Vercel discover the Next.js package and build configuration after the repository reorganization.
+Set the Vercel project's **Settings -> Build & Deployment -> Root Directory** to `frontend`. This lets Vercel discover the Next.js package and build configuration after the repository reorganization.
