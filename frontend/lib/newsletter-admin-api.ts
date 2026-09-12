@@ -1,0 +1,13 @@
+import { apiRequest } from "@/lib/api-client";
+import type { MediaAsset, PageResult } from "@/lib/blog-admin-api";
+export type Campaign={id:string;subject:string;content:string;slug?:string|null;title?:string|null;summary?:string|null;body?:Record<string,unknown>|null;publicationStatus:"DRAFT"|"PUBLISHED"|"ARCHIVED";status:string;publishedAt?:string|null;sentAt?:string|null;updatedAt?:string;media?:{id:string;role:"THUMBNAIL"|"GALLERY";sortOrder:number;mediaAsset:MediaAsset}[]};
+export type CampaignInput={subject:string;content:string;slug?:string;title?:string;summary?:string;body?:Record<string,unknown>;thumbnailMediaAssetId?:string;galleryMediaAssetIds?:string[];videoUrl?:string;publicationStatus?:"DRAFT"|"PUBLISHED"|"ARCHIVED";status?:string};
+export const listCampaigns=()=>apiRequest<PageResult<Campaign>>("/admin/newsletter/campaigns?pageSize=100");
+export const getCampaign=(id:string)=>apiRequest<Campaign>(`/admin/newsletter/campaigns/${id}`);
+export const createCampaign=(d:CampaignInput)=>apiRequest<Campaign>("/admin/newsletter/campaigns",{method:"POST",body:JSON.stringify(d)});
+export const updateCampaign=(id:string,d:CampaignInput)=>apiRequest<Campaign>(`/admin/newsletter/campaigns/${id}`,{method:"PATCH",body:JSON.stringify(d)});
+export const publishCampaign=(id:string)=>apiRequest<Campaign>(`/admin/newsletter/campaigns/${id}/publish`,{method:"POST"});
+export const archiveCampaign=(id:string)=>apiRequest<Campaign>(`/admin/newsletter/campaigns/${id}/archive`,{method:"POST"});
+export const prepareCampaign=(id:string)=>apiRequest<{prepared:number;sent:boolean}>(`/admin/newsletter/campaigns/${id}/prepare`,{method:"POST"});
+export const sendCampaign=(id:string)=>apiRequest<{sent:number;failed:number}>(`/admin/newsletter/campaigns/${id}/send`,{method:"POST"});
+export const listSubscribers=()=>apiRequest<PageResult<{id:string;status:string}>>("/admin/newsletter/subscribers?pageSize=1");

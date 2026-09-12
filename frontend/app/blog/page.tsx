@@ -1,2 +1,10 @@
-import Link from "next/link"; import {SiteShell} from "@/components/shared/SiteShell"; import {PageHero} from "@/components/shared/PageHero"; import {Reveal} from "@/components/ui/Reveal"; import {posts} from "@/data/extended"; import Image from "next/image";
-export default function Blog(){return <SiteShell><PageHero eyebrow="Journal" title={<>Notes for a more <em>intentional life.</em></>} copy="Practice notes, teacher reflections and simple ideas to carry beyond the mat." image="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=2000&q=88"/><section className="section"><div className="container blog-grid">{posts.map((p,i)=><Reveal as="div" key={p.slug} delay={i*0.08}><Link href={`/blog/${p.slug}`} className="blog-card"><div className="blog-image"><Image src={p.image} alt="" fill sizes="(max-width: 860px) 100vw, 50vw" /></div><div><p className="eyebrow">{p.tag} · {p.date}</p><h2>{p.title}</h2><p>{p.excerpt}</p><span className="text-link">Read journal →</span></div></Link></Reveal>)}</div></section></SiteShell>}
+import Link from "next/link";
+import { SiteShell } from "@/components/shared/SiteShell";
+import { PageHero } from "@/components/shared/PageHero";
+import { Reveal } from "@/components/ui/Reveal";
+import { listPublishedPosts, thumbnail, formatPublishedDate } from "@/lib/content-public-api";
+
+export default async function Blog() {
+  const result = await listPublishedPosts();
+  return <SiteShell><PageHero eyebrow="Newsletter" title={<>Notes for a more <em>intentional life.</em></>} copy="Practice notes, teacher reflections and simple ideas to carry beyond the mat." image="/images/about/nomad-story.jpg" /><section className="section"><div className="container blog-grid">{result.items.length ? result.items.map((post, i) => <Reveal as="div" key={post.id} delay={i * 0.05}><Link href={`/blog/${post.slug}`} className="blog-card"><div className="blog-image"><img src={thumbnail(post.media)} alt="" /></div><div><p className="eyebrow">{post.category?.name ?? "Newsletter"}{post.publishedAt ? ` · ${formatPublishedDate(post.publishedAt)}` : ""}</p><h2>{post.title}</h2><p>{post.excerpt ?? "A thoughtful note from Nomad Yoga."}</p><span className="text-link">Read newsletter →</span></div></Link></Reveal>) : <div className="content-empty"><h2>The newsletter is taking shape.</h2><p>New reflections will be shared here soon.</p></div>}</div></section></SiteShell>;
+}

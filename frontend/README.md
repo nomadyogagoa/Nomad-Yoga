@@ -6,7 +6,7 @@ A combined frontend-only implementation for the Nomad Yoga platform. The brand n
 
 - Phase 1: Home landing page and premium design system
 - Phase 2: About, Programs, Program Details, Schedule, Instructors, Instructor Details
-- Phase 3: Pricing, Contact, Gallery, Journal/Blog, Login, Registration
+- Phase 3: Pricing, Contact, Gallery, Newsletter, Login, Registration
 - Phase 4: Student Dashboard UI
 - Phase 5: Admin Dashboard UI, CMS content editor, Students, Programs, Payments, Notifications, Media Library, Settings and feature visibility
 - Phase 6: Responsive behavior, accessibility focus states, reduced-motion support, UI consistency and polish

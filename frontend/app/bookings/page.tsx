@@ -1,4 +1,5 @@
 import { BookingList } from "@/components/member/BookingList";
+import { HostelBookingList } from "@/components/member/HostelBookingList";
 import { MemberShell } from "@/components/member/MemberShell";
 import { memberBookings } from "@/data/member";
 
@@ -7,5 +8,5 @@ export default function BookingsPage() {
     <BookingList title="Upcoming" status="Upcoming" bookings={memberBookings} />
     <BookingList title="Completed" status="Completed" bookings={memberBookings} />
     <BookingList title="Cancelled" status="Cancelled" bookings={memberBookings} />
-  </div></MemberShell>;
+  </div><HostelBookingList /></MemberShell>;
 }

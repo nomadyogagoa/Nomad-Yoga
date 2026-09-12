@@ -5,6 +5,7 @@ import { PWAInstallBanner } from "@/components/pwa/PWAInstallBanner";
 import { PWAInstallabilityProvider } from "@/components/pwa/PWAInstallabilityProvider";
 import { PWAUpdateBanner } from "@/components/pwa/PWAUpdateBanner";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nomad-yoga.vercel.app"),
@@ -39,9 +40,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <OrganicTexture />
         <ServiceWorkerRegistration>
           <PWAInstallabilityProvider>
-            {children}
-            <PWAInstallBanner />
-            <PWAUpdateBanner />
+            <AuthProvider>
+              {children}
+              <PWAInstallBanner />
+              <PWAUpdateBanner />
+            </AuthProvider>
           </PWAInstallabilityProvider>
         </ServiceWorkerRegistration>
       </body>

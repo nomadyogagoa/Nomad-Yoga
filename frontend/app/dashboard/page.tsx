@@ -8,6 +8,7 @@ const upcomingClasses = memberClasses.slice(1, 4);
 const quickActions = [
   { label: "Book Class", href: "/classes", icon: "plus" },
   { label: "My Schedule", href: "/bookings", icon: "calendar" },
+  { label: "Explore stays", href: "/hostel", icon: "home" },
   { label: "Membership", href: "/profile#membership", icon: "wallet" },
   { label: "Notifications", href: "/notifications", icon: "bell", badge: "3" },
 ] as const;

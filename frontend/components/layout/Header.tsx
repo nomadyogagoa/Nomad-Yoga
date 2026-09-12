@@ -5,8 +5,8 @@ import Link from "next/link";
 import { featureFlags, siteConfig } from "@/config/site";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 const navItems = [
-  ["Home", "/", true], ["About", "/about", true], ["Programs", "/programs", featureFlags.programs], ["Reiki", "/reiki", true], ["Schedule", "/schedule", featureFlags.schedule],
-  ["Instructors", "/instructors", featureFlags.instructors], ["Pricing", "/pricing", featureFlags.pricing], ["Gallery", "/gallery", featureFlags.gallery], ["Journal", "/blog", featureFlags.blog]
+  ["Home", "/", true], ["About", "/about", true], ["Hostel", "/hostel", true], ["Programs", "/programs", featureFlags.programs], ["Reiki", "/reiki", true], ["Schedule", "/schedule", featureFlags.schedule],
+  ["Instructors", "/instructors", featureFlags.instructors], ["Pricing", "/pricing", featureFlags.pricing], ["Gallery", "/gallery", featureFlags.gallery], ["Newsletter", "/newsletter", true], ["Shop", "/shop", true]
 ] as const;
 export function Header(){
   const[open,setOpen]=useState(false);

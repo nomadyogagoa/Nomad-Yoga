@@ -2,7 +2,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { Reveal } from "@/components/ui/Reveal";
 import Link from "next/link";
 
-const features = ['Programs', 'Schedule', 'Instructors', 'Pricing', 'Gallery', 'Journal / Blog', 'Trial booking', 'Member login', 'Student dashboard'];
+const features = ['Programs', 'Schedule', 'Instructors', 'Pricing', 'Gallery', 'Newsletter', 'Trial booking', 'Member login', 'Student dashboard'];
 
 export default function Settings() {
   return (

@@ -1,0 +1,1 @@
+import {AdminShell} from "@/components/admin/AdminShell"; import {NewsletterEditor} from "@/components/admin/NewsletterEditor"; export default function NewNewsletter(){return <AdminShell active="Newsletter" title="New newsletter" subtitle="Prepare content first, then choose publication and delivery separately."><NewsletterEditor/></AdminShell>}

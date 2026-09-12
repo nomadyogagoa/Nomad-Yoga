@@ -1,2 +1,6 @@
-import Link from "next/link"; import {AuthShell} from "@/components/shared/AuthShell";
-export default function Register(){return <AuthShell eyebrow="Begin here" title="Create your member space" copy="Book classes, manage your membership and receive thoughtful reminders in one place."><form className="auth-form"><div className="form-row"><label>First name<input placeholder="First name"/></label><label>Last name<input placeholder="Last name"/></label></div><label>Email<input type="email" placeholder="you@example.com"/></label><label>Mobile number<input placeholder="+91"/></label><label>Password<input type="password" placeholder="Create a password"/></label><label className="checkbox"><input type="checkbox"/> I agree to receive booking updates by email and WhatsApp.</label><Link className="button auth-button" href="/dashboard">Create account</Link><p className="auth-switch">Already a member? <Link href="/login">Sign in</Link></p></form></AuthShell>}
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { AuthShell } from "@/components/shared/AuthShell";
+
+export default function Register() {
+  return <AuthShell eyebrow="Begin here" title="Create your member space" copy="Book classes, manage your membership and receive thoughtful reminders in one place."><RegisterForm /></AuthShell>;
+}

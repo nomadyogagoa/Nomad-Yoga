@@ -1,2 +1,7 @@
-import Link from "next/link"; import {AuthShell} from "@/components/shared/AuthShell";
-export default function Login(){return <AuthShell eyebrow="Welcome back" title="Return to your practice" copy="Your classes, bookings and progress are waiting for you."><form className="auth-form"><label>Email<input type="email" placeholder="you@example.com"/></label><label>Password<input type="password" placeholder="••••••••"/></label><div className="form-between"><label className="checkbox"><input type="checkbox"/> Remember me</label><a>Forgot password?</a></div><Link className="button auth-button" href="/dashboard">Sign in</Link><p className="auth-switch">New here? <Link href="/register">Create your account</Link></p></form></AuthShell>}
+import { LoginForm } from "@/components/auth/LoginForm";
+import { AuthShell } from "@/components/shared/AuthShell";
+
+export default async function Login({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+  const { returnTo } = await searchParams;
+  return <AuthShell eyebrow="Welcome back" title="Return to your practice" copy="Your classes, bookings and progress are waiting for you."><LoginForm returnTo={returnTo} /></AuthShell>;
+}
