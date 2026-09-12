@@ -1,29 +1,10 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Version } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
-import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
-import { RoleName } from '@prisma/client';
+import { IsArray, IsEmail, IsEnum, IsObject, IsOptional, IsString, IsUrl, ArrayMaxSize, Length } from 'class-validator';
+import { NewsletterPublicationStatus, RoleName } from '@prisma/client';
 import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { NewsletterService } from './newsletter.service';
-
-class Subscribe { @IsEmail() email!: string; @IsOptional() @IsString() @Length(1, 100) firstName?: string; }
-class Campaign { @IsString() @Length(1, 200) subject!: string; @IsString() @Length(1, 20000) content!: string; @IsOptional() @IsString() status?: string; }
-
-@Controller('newsletter')
-export class NewsletterController {
-  constructor(private readonly service: NewsletterService) {}
-  @Public() @Post('subscribe') @Version('1') @Throttle({ default: { limit: 5, ttl: 60_000 } }) subscribe(@Body() dto: Subscribe) { return this.service.subscribe(dto.email, dto.firstName); }
-  @Public() @Post('unsubscribe') @Version('1') @Throttle({ default: { limit: 5, ttl: 60_000 } }) unsubscribe(@Body() dto: Subscribe) { return this.service.unsubscribe(dto.email); }
-}
-
-@Controller('admin/newsletter') @Roles(RoleName.ADMIN)
-export class NewsletterAdminController {
-  constructor(private readonly service: NewsletterService) {}
-  @Get('subscribers') @Version('1') subscribers(@Query() query: any) { return this.service.subscribers(query); }
-  @Get('campaigns') @Version('1') campaigns(@Query() query: any) { return this.service.campaigns(query); }
-  @Post('campaigns') @Version('1') create(@Body() dto: Campaign) { return this.service.createCampaign(dto); }
-  @Get('campaigns/:id') @Version('1') get(@Param('id') id: string) { return this.service.campaign(id); }
-  @Patch('campaigns/:id') @Version('1') update(@Param('id') id: string, @Body() dto: Campaign) { return this.service.updateCampaign(id, dto); }
-  @Post('campaigns/:id/prepare') @Version('1') prepare(@Param('id') id: string) { return this.service.prepare(id); }
-  @Post('campaigns/:id/send') @Version('1') send(@Param('id') id: string) { return this.service.sendCampaign(id); }
-}
+class Subscribe { @IsEmail() email!: string; @IsOptional() @IsString() @Length(1,100) firstName?: string; }
+export class CampaignDto { @IsString() @Length(1,200) subject!: string; @IsString() @Length(1,20000) content!: string; @IsOptional() @IsString() slug?: string; @IsOptional() @IsString() title?: string; @IsOptional() @IsString() summary?: string; @IsOptional() @IsObject() body?: Record<string,unknown>; @IsOptional() @IsString() thumbnailMediaAssetId?: string; @IsOptional() @IsArray() @ArrayMaxSize(5) @IsString({each:true}) galleryMediaAssetIds?: string[]; @IsOptional() @IsUrl({protocols:['https'],require_protocol:true}) videoUrl?: string; @IsOptional() @IsEnum(NewsletterPublicationStatus) publicationStatus?: NewsletterPublicationStatus; @IsOptional() @IsString() status?: string; }
+@Controller('newsletter') export class NewsletterController { constructor(private readonly service: NewsletterService) {} @Public() @Post('subscribe') @Version('1') subscribe(@Body() d:Subscribe){return this.service.subscribe(d.email,d.firstName)} @Public() @Post('unsubscribe') @Version('1') unsubscribe(@Body() d:Subscribe){return this.service.unsubscribe(d.email)} @Public() @Get('campaigns') @Version('1') campaigns(@Query() q:any){return this.service.publicCampaigns(q)} @Public() @Get('campaigns/:slug') @Version('1') campaign(@Param('slug') slug:string){return this.service.publicCampaign(slug)} }
+@Controller('admin/newsletter') @Roles(RoleName.ADMIN) export class NewsletterAdminController { constructor(private readonly service:NewsletterService){} @Get('subscribers') @Version('1') subscribers(@Query() q:any){return this.service.subscribers(q)} @Get('campaigns') @Version('1') campaigns(@Query() q:any){return this.service.campaigns(q)} @Post('campaigns') @Version('1') create(@Body() d:CampaignDto){return this.service.createCampaign(d)} @Get('campaigns/:id') @Version('1') get(@Param('id') id:string){return this.service.campaign(id)} @Patch('campaigns/:id') @Version('1') update(@Param('id') id:string,@Body() d:CampaignDto){return this.service.updateCampaign(id,d)} @Post('campaigns/:id/publish') @Version('1') publish(@Param('id') id:string){return this.service.publish(id)} @Post('campaigns/:id/archive') @Version('1') archive(@Param('id') id:string){return this.service.archive(id)} @Post('campaigns/:id/prepare') @Version('1') prepare(@Param('id') id:string){return this.service.prepare(id)} @Post('campaigns/:id/send') @Version('1') send(@Param('id') id:string){return this.service.sendCampaign(id)} }

@@ -112,6 +112,28 @@ enum BlogStatus {
   ARCHIVED
 }
 
+enum MediaProvider {
+  LOCAL
+  CLOUDINARY
+}
+
+enum MediaResourceType {
+  IMAGE
+  VIDEO
+  OTHER
+}
+
+enum ContentMediaRole {
+  THUMBNAIL
+  GALLERY
+}
+
+enum NewsletterPublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum ActivityType {
   YOGA
   MEDITATION
@@ -764,21 +786,23 @@ model BlogCategory {
 }
 
 model BlogPost {
-  id            String        @id @default(cuid())
+  id            String         @id @default(cuid())
   categoryId    String?
   authorId      String?
-  slug          String        @unique
+  slug          String         @unique
   title         String
-  excerpt       String?       @db.Text
+  excerpt       String?        @db.Text
   body          Json
   coverImageUrl String?
-  status        BlogStatus    @default(DRAFT)
+  status        BlogStatus     @default(DRAFT)
   publishedAt   DateTime?
-  category      BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  author        User?         @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  category      BlogCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author        User?          @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
   tags          BlogPostTag[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  videoUrl      String?
+  media         ContentMedia[]
 
   @@index([status, publishedAt])
   @@index([categoryId])
@@ -816,15 +840,25 @@ model NewsletterSubscriber {
 }
 
 model NewsletterCampaign {
-  id          String               @id @default(cuid())
-  subject     String
-  content     String               @db.Text
-  status      String               @default("DRAFT")
-  scheduledAt DateTime?
-  sentAt      DateTime?
-  deliveries  NewsletterDelivery[]
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  id                String                      @id @default(cuid())
+  subject           String
+  content           String                      @db.Text
+  status            String                      @default("DRAFT")
+  scheduledAt       DateTime?
+  sentAt            DateTime?
+  deliveries        NewsletterDelivery[]
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  slug              String?                     @unique
+  title             String?
+  summary           String?                     @db.Text
+  body              Json?
+  publicationStatus NewsletterPublicationStatus @default(DRAFT)
+  publishedAt       DateTime?
+  videoUrl          String?
+  media             ContentMedia[]
+
+  @@index([publicationStatus, publishedAt])
 }
 
 model NewsletterDelivery {
@@ -973,8 +1007,8 @@ model Notification {
 }
 
 model MediaAsset {
-  id           String   @id @default(cuid())
-  storageKey   String   @unique
+  id           String            @id @default(cuid())
+  storageKey   String            @unique
   url          String
   altText      String?
   mimeType     String
@@ -982,10 +1016,32 @@ model MediaAsset {
   width        Int?
   height       Int?
   uploadedById String?
-  uploadedBy   User?    @relation("MediaUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
-  createdAt    DateTime @default(now())
+  uploadedBy   User?             @relation("MediaUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime          @default(now())
+  provider     MediaProvider     @default(LOCAL)
+  resourceType MediaResourceType @default(IMAGE)
+  format       String?
+  attachments  ContentMedia[]
 
   @@index([uploadedById, createdAt])
+}
+
+model ContentMedia {
+  id                   String              @id @default(cuid())
+  mediaAssetId         String
+  blogPostId           String?
+  newsletterCampaignId String?
+  role                 ContentMediaRole
+  sortOrder            Int                 @default(0)
+  createdAt            DateTime            @default(now())
+  mediaAsset           MediaAsset          @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  blogPost             BlogPost?           @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  newsletterCampaign   NewsletterCampaign? @relation(fields: [newsletterCampaignId], references: [id], onDelete: Cascade)
+
+  @@unique([blogPostId, mediaAssetId])
+  @@unique([newsletterCampaignId, mediaAssetId])
+  @@index([blogPostId, role, sortOrder])
+  @@index([newsletterCampaignId, role, sortOrder])
 }
 
 model SiteSetting {

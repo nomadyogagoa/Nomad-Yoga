@@ -16,6 +16,9 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   if (typeof config.DATABASE_URL !== 'string' || config.DATABASE_URL.trim().length === 0) {
     throw new Error('DATABASE_URL is required to start the API.');
   }
+  if (typeof config.DATABASE_CA_CERT_PATH !== 'string' || config.DATABASE_CA_CERT_PATH.trim().length === 0) {
+    throw new Error('DATABASE_CA_CERT_PATH is required to start the API.');
+  }
 
   if (typeof config.FRONTEND_URL !== 'string') {
     throw new Error('FRONTEND_URL is required to start the API.');
@@ -61,6 +64,10 @@ export function validateEnvironment(config: Record<string, unknown>): Record<str
   for (const key of ['PAYMENT_SUCCESS_URL', 'PAYMENT_CANCEL_URL']) {
     if (config[key] !== undefined && config[key] !== '') { try { new URL(String(config[key])); } catch { throw new Error(`${key} must be a valid URL.`); } }
   }
+  for (const key of ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']) {
+    if (config[key] !== undefined && config[key] !== '' && typeof config[key] !== 'string') throw new Error(`${key} must be a string.`);
+  }
+  if (config.CLOUDINARY_FOLDER !== undefined && config.CLOUDINARY_FOLDER !== '' && (typeof config.CLOUDINARY_FOLDER !== 'string' || !/^[a-zA-Z0-9_\-/]{1,120}$/.test(config.CLOUDINARY_FOLDER))) throw new Error('CLOUDINARY_FOLDER must be a bounded path.');
 
   return { ...config, NODE_ENV: nodeEnv, PORT: port };
 }

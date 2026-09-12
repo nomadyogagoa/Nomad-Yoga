@@ -1,4 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Version } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UploadedFile, UseInterceptors, Version } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { RoleName } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -23,6 +25,7 @@ export class AdminController {
  @Get('media/:id') @Version('1') media(@Param('id') id: string) { return this.admin.media(id); }
  @Post('media') @Version('1') createMedia(@CurrentUser() actor: AuthenticatedUser, @Body() dto: CreateMediaDto) { return this.admin.createMedia(actor.id, dto); }
  @Patch('media/:id') @Version('1') updateMedia(@CurrentUser() actor: AuthenticatedUser, @Param('id') id: string, @Body() dto: UpdateMediaDto) { return this.admin.updateMedia(actor.id, id, dto); }
+ @Post('media/upload') @Version('1') @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } })) uploadMedia(@CurrentUser() actor: AuthenticatedUser, @UploadedFile() file: Express.Multer.File, @Body('altText') altText?: string, @Body('context') context?: string) { if (!file) throw new BadRequestException({ code: 'MEDIA_FILE_REQUIRED', message: 'A media file is required.' }); return this.admin.uploadMedia(actor.id, file, altText, context); }
  @Delete('media/:id') @Version('1') deleteMedia(@CurrentUser() actor: AuthenticatedUser, @Param('id') id: string) { return this.admin.deleteMedia(actor.id, id); }
  @Get('settings') @Version('1') settings() { return this.admin.settings(); }
  @Get('settings/:key') @Version('1') setting(@Param('key') key: string) { return this.admin.setting(key); }

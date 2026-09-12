@@ -17,7 +17,8 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
   app.use(helmet());
-  const allowedOrigins = (config.get<string>('FRONTEND_URLS') ?? config.getOrThrow<string>('FRONTEND_URL')).split(',').map((origin) => origin.trim()).filter(Boolean);
+  const configuredOrigins = config.get<string>('FRONTEND_URLS');
+  const allowedOrigins = (configuredOrigins || config.getOrThrow<string>('FRONTEND_URL')).split(',').map((origin) => origin.trim()).filter(Boolean);
   app.enableCors({ origin: (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => callback(null, !origin || allowedOrigins.includes(origin)), credentials: true });
   app.use((request: any, response: any, next: () => void) => { const incoming = request.header?.('x-request-id'); const requestId = typeof incoming === 'string' && /^[A-Za-z0-9_-]{8,128}$/.test(incoming) ? incoming : randomUUID(); request.requestId = requestId; response.setHeader('X-Request-Id', requestId); next(); });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }));

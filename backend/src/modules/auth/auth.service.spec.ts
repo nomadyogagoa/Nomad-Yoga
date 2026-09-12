@@ -1,4 +1,10 @@
 import { UnauthorizedException } from '@nestjs/common';
+
+// @nestjs/jwt 12 is ESM-only. This unit suite instantiates AuthService directly
+// and supplies its own JwtService double, so prevent Jest's CommonJS runtime
+// from loading the package implementation.
+jest.mock('@nestjs/jwt', () => ({ JwtService: class JwtService {} }));
+
 import { AuthService } from './auth.service';
 
 const config = { get: jest.fn((key: string) => ({ EMAIL_VERIFICATION_EXPIRES_MINUTES: 60, PASSWORD_RESET_EXPIRES_MINUTES: 60, REFRESH_TOKEN_EXPIRES_DAYS: 30 }[key])), getOrThrow: jest.fn((key: string) => ({ FRONTEND_URL: 'http://localhost:3000' }[key])) };
