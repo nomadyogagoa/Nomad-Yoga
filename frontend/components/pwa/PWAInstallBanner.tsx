@@ -35,6 +35,7 @@ export function PWAInstallBanner() {
     isAndroid,
     isChromeAndroid,
     isMobile,
+    isPhoneSized,
     needsManualIOSInstall,
     needsManualAndroidInstall,
     installationCompleted,
@@ -60,7 +61,7 @@ export function PWAInstallBanner() {
   useEffect(() => {
     setIsVisible(false);
 
-    if (updateAvailable || routeSuppressed || isInstalled || isStandalone || installationCompleted) {
+    if (updateAvailable || !isPhoneSized || routeSuppressed || isInstalled || isStandalone || installationCompleted) {
       setIsIOSInstructionsOpen(false);
       setIsAndroidInstructionsOpen(false);
       return;
@@ -113,6 +114,7 @@ export function PWAInstallBanner() {
     isAndroid,
     isInstalled,
     isMobile,
+    isPhoneSized,
     isStandalone,
     needsManualAndroidInstall,
     routeSuppressed,
@@ -155,7 +157,7 @@ export function PWAInstallBanner() {
     if (outcome === "unavailable") setIsVisible(false);
   };
 
-  if (updateAvailable || (!isVisible && !isIOSInstructionsOpen && !isAndroidInstructionsOpen)) return null;
+  if (!isPhoneSized || updateAvailable || (!isVisible && !isIOSInstructionsOpen && !isAndroidInstructionsOpen)) return null;
 
   return (
     <>

@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { usePWAUpdate } from "@/components/pwa/ServiceWorkerRegistration";
+import { usePWAInstallability } from "@/components/pwa/PWAInstallabilityProvider";
 
 export function PWAUpdateBanner() {
   const { updateAvailable, isApplyingUpdate, updateError, applyUpdate } = usePWAUpdate();
+  const { isPhoneSized } = usePWAInstallability();
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     if (!updateAvailable) setIsDismissed(false);
   }, [updateAvailable]);
 
-  if (!updateAvailable || isDismissed) return null;
+  if (!isPhoneSized || !updateAvailable || isDismissed) return null;
 
   return (
     <aside

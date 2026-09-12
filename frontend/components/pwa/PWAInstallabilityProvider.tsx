@@ -36,6 +36,7 @@ export interface PWAInstallabilityState {
   isAndroid: boolean;
   isChromeAndroid: boolean;
   isMobile: boolean;
+  isPhoneSized: boolean;
   needsManualIOSInstall: boolean;
   needsManualAndroidInstall: boolean;
   installationCompleted: boolean;
@@ -61,6 +62,7 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
     isAndroid: false,
     isChromeAndroid: false,
     isMobile: false,
+    isPhoneSized: false,
   });
 
   useEffect(() => {
@@ -94,7 +96,12 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
       navigatorWithContext.userAgentData?.mobile ??
       (isIOS || isAndroid || window.matchMedia("(pointer: coarse)").matches);
 
-    setPlatform({ isIOS, isAndroid, isChromeAndroid, isMobile });
+    const phoneViewport = window.matchMedia("(max-width: 768px)");
+    const updatePhoneSized = () => {
+      setPlatform((current) => ({ ...current, isPhoneSized: isMobile && phoneViewport.matches }));
+    };
+
+    setPlatform({ isIOS, isAndroid, isChromeAndroid, isMobile, isPhoneSized: isMobile && phoneViewport.matches });
     updateStandaloneMode();
 
     const handleBeforeInstallPrompt = (event: DeferredInstallPromptEvent) => {
@@ -114,11 +121,15 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
     };
 
     displayModeQueries.forEach((query) => query.addEventListener("change", updateStandaloneMode));
+    phoneViewport.addEventListener("change", updatePhoneSized);
+    window.addEventListener("resize", updatePhoneSized, { passive: true });
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
       displayModeQueries.forEach((query) => query.removeEventListener("change", updateStandaloneMode));
+      phoneViewport.removeEventListener("change", updatePhoneSized);
+      window.removeEventListener("resize", updatePhoneSized);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
       deferredPrompt.current = null;
@@ -172,6 +183,7 @@ export function PWAInstallabilityProvider({ children }: Readonly<{ children: Rea
       isAndroid: platform.isAndroid,
       isChromeAndroid: platform.isChromeAndroid,
       isMobile: platform.isMobile,
+      isPhoneSized: platform.isPhoneSized,
       needsManualIOSInstall: platform.isIOS && !isInstalled,
       needsManualAndroidInstall:
         platform.isAndroid && !isInstalled && !canPromptInstall,
