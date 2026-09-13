@@ -25,14 +25,22 @@ export class AuthService {
  private frontendUrl(path: string, token: string): string { return `${this.config.getOrThrow<string>('FRONTEND_URL').replace(/\/$/, '')}${path}?token=${encodeURIComponent(token)}`; }
  async register(dto: RegisterDto): Promise<{ message: string }> {
   const email = this.normalizeEmail(dto.email); const rawToken = this.randomToken();
+  let userId: string | undefined;
   try {
    await this.prisma.$transaction(async (tx) => {
     const role = await tx.role.upsert({ where: { name: RoleName.USER }, update: {}, create: { name: RoleName.USER, description: 'Default member role' } });
     const user = await tx.user.create({ data: { email, passwordHash: await this.hashPassword(dto.password), status: UserStatus.ACTIVE, profile: { create: { firstName: dto.firstName.trim(), lastName: dto.lastName.trim() } }, roles: { create: { roleId: role.id } } } });
+    userId = user.id;
     await tx.emailVerificationToken.create({ data: { userId: user.id, tokenHash: this.hashToken(rawToken), expiresAt: this.expiresIn(this.config.get<number>('EMAIL_VERIFICATION_EXPIRES_MINUTES') ?? 60) } });
    });
   } catch (error) { if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new ConflictException({ code: 'EMAIL_ALREADY_REGISTERED', message: 'An account with this email already exists.' }); throw error; }
-  await this.email.sendEmailVerification(email, this.frontendUrl('/verify-email', rawToken));
+  try {
+   await this.email.sendEmailVerification(email, this.frontendUrl('/verify-email', rawToken));
+  } catch (error) {
+   // Undo the account so a failed verification email doesn't strand the user behind a false EMAIL_ALREADY_REGISTERED on retry.
+   if (userId) await this.prisma.emailVerificationToken.deleteMany({ where: { userId } }).then(() => this.prisma.user.delete({ where: { id: userId } })).catch(() => undefined);
+   throw error;
+  }
   return { message: 'Registration successful. Check your email to verify your account.' };
  }
  async verifyEmail(token: string): Promise<{ message: string }> {
