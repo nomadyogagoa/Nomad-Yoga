@@ -28,14 +28,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('nomad-theme');if(t==='candlelight'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','candlelight');}}catch(e){}})();`,
-          }}
-        />
-      </head>
+    <html lang="en">
       <body>
         <OrganicTexture />
         <ServiceWorkerRegistration>

@@ -1,4 +1,4 @@
-type IconName = "calendar"|"users"|"sparkles"|"wallet"|"bell"|"book"|"chart"|"settings"|"image"|"mail"|"arrow"|"check"|"clock"|"menu"|"heart"|"shield"|"home"|"edit"|"plus"|"search"|"logout"|"share";
+export type IconName = "calendar"|"users"|"sparkles"|"wallet"|"bell"|"book"|"chart"|"settings"|"image"|"mail"|"arrow"|"check"|"clock"|"menu"|"heart"|"shield"|"home"|"edit"|"plus"|"search"|"logout"|"share"|"linkedin"|"instagram"|"facebook"|"x"|"youtube";
 const paths: Record<IconName, React.ReactNode> = {
   calendar:<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></>,
   users:<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></>,
@@ -22,5 +22,10 @@ const paths: Record<IconName, React.ReactNode> = {
   search:<><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>,
   logout:<><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-6"/></>,
   share:<><path d="M12 16V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></>,
+  linkedin:<><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M8 10v6M8 8v.01M12 16v-3a3 3 0 0 1 6 0v3M12 10v6"/></>,
+  instagram:<><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".7" fill="currentColor" stroke="none"/></>,
+  facebook:<path d="M14 8h3V4h-3c-3.3 0-5 2-5 5v3H6v4h3v5h4v-5h3l1-4h-4V9c0-.7.3-1 1-1Z"/>,
+  x:<path d="M5 4l14 16M19 4 5 20"/>,
+  youtube:<><rect x="3" y="6" width="18" height="12" rx="3"/><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none"/></>,
 };
 export function Icon({name,size=18,className=""}:{name:IconName,size?:number,className?:string}){return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>}

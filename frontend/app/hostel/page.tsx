@@ -195,7 +195,7 @@ export default function HostelPage() {
             <h2>Ready when you are.</h2>
             <p>Live availability and booking will be available here once the hostel inventory connection is switched on.</p>
           </div>
-          <Link className="button" href="#hostel-availability">Plan your stay</Link>
+          <a className="button" href="#hostel-availability">Plan your stay</a>
         </div>
       </section>
     </SiteShell>

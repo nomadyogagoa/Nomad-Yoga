@@ -14,6 +14,7 @@ export function LoginForm({ returnTo }: { returnTo?: string }) {
   const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,7 +25,7 @@ export function LoginForm({ returnTo }: { returnTo?: string }) {
       await login({ email: String(form.get("email") ?? ""), password: String(form.get("password") ?? "") });
       router.replace(safeReturnTo(returnTo));
     } catch {
-      setError("We couldn’t sign you in with those details. Please try again.");
+      setError("We couldn't sign you in with those details. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -32,7 +33,8 @@ export function LoginForm({ returnTo }: { returnTo?: string }) {
 
   return <form className="auth-form" onSubmit={submit} noValidate>
     <label>Email<input name="email" type="email" autoComplete="email" placeholder="you@example.com" required /></label>
-    <label>Password<input name="password" type="password" autoComplete="current-password" placeholder="••••••••" required /></label>
+    <label>Password<input name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="••••••••" required /></label>
+    <label className="checkbox"><input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />Show password</label>
     <div className="form-between"><span>Use the email linked to your membership.</span><Link href="/forgot-password">Forgot password?</Link></div>
     {error ? <p className="auth-message is-error" role="alert">{error}</p> : null}
     <button className="button auth-button" type="submit" disabled={isSubmitting}>{isSubmitting ? "Signing in…" : "Sign in"}</button>

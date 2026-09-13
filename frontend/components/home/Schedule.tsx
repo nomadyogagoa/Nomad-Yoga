@@ -9,7 +9,7 @@ export function Schedule() {
           <p className="eyebrow">TODAY AT THE STUDIO</p>
           <h2>Make space<br /><em>for yourself.</em></h2>
           <p>A simple rhythm of morning and evening practices designed to fit around real life.</p>
-          <a className="button button-outline" href="#schedule">View full schedule</a>
+          <a className="button button-outline" href="/schedule">View full schedule</a>
         </Reveal>
         <Reveal className="schedule-card" delay={0.15}>
           {schedule.map((item) => (

@@ -1,26 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import type { ClassSession } from "@/data/member";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ApiError } from "@/lib/api-client";
+import { createCourseBooking, getCourseBookings, getCourseSessions, sessionDateLabel, sessionTimeLabel, type CourseSession } from "@/lib/course-booking-api";
 
 const filters = ["Today", "Week", "All"] as const;
 type ClassFilter = (typeof filters)[number];
-
-export function ClassesView({ classes }: { classes: ClassSession[] }) {
-  const [filter, setFilter] = useState<ClassFilter>("Today");
-  const visibleClasses = filter === "All" ? classes : classes.filter((item) => item.period === filter);
-  return <>
-    <div className="member-filter" role="group" aria-label="Filter classes">
-      {filters.map((item) => <button key={item} type="button" className={filter === item ? "active" : undefined} aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</button>)}
-    </div>
-    <section className="member-list-card" aria-labelledby="class-list-title">
-      <div className="member-section-heading"><div><p className="member-kicker">Find your rhythm</p><h2 id="class-list-title">{filter === "All" ? "All classes" : `${filter}'s classes`}</h2></div><span>{visibleClasses.length} sessions</span></div>
-      <div className="member-class-list">{visibleClasses.map((item) => <article key={item.id} className="member-class-row">
-        <div className="member-date-tile"><strong>{item.date.split(" ")[0]}</strong><span>{item.date.split(" ")[1] ?? ""}</span></div>
-        <div className="member-class-copy"><span>{item.day} · {item.time}</span><h3>{item.title}</h3><p>{item.instructor} · {item.duration} · {item.type}</p></div>
-        <span className={`member-status status-${item.status.toLowerCase()}`}>{item.status}</span>
-        <button type="button" className="member-row-action" disabled={item.status !== "Available"} aria-label={`${item.status === "Available" ? "Book" : item.status} ${item.title}`}>{item.status === "Available" ? "Book" : item.status}</button>
-      </article>)}</div>
-    </section>
-  </>;
+function localDateKey(value: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", { day: "2-digit", month: "2-digit", year: "numeric", timeZone }).formatToParts(value);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+function isToday(session: CourseSession) { const timeZone = session.timezone || "Asia/Kolkata"; return localDateKey(new Date(session.startAt), timeZone) === localDateKey(new Date(), timeZone); }
+function isThisWeek(session: CourseSession) { return new Date(session.startAt).getTime() <= Date.now() + 7 * 24 * 60 * 60 * 1000; }
+export function ClassesView() {
+  const [filter, setFilter] = useState<ClassFilter>("Today"); const [sessions, setSessions] = useState<CourseSession[]>([]); const [bookedIds, setBookedIds] = useState<Set<string>>(new Set()); const [isLoading, setIsLoading] = useState(true); const [bookingId, setBookingId] = useState<string | null>(null); const [error, setError] = useState<string | null>(null);
+  const load = useCallback(async () => { setIsLoading(true); try { const [sessionResult, bookingResult] = await Promise.all([getCourseSessions(), getCourseBookings()]); setSessions(sessionResult.items); setBookedIds(new Set(bookingResult.items.filter((booking) => booking.status === "PENDING" || booking.status === "CONFIRMED").map((booking) => booking.programSession.id))); setError(null); } catch { setError("We couldn’t load live classes. Please refresh and try again."); } finally { setIsLoading(false); } }, []);
+  useEffect(() => { void load(); }, [load]);
+  const visibleClasses = useMemo(() => sessions.filter((session) => filter === "All" || (filter === "Today" ? isToday(session) : isThisWeek(session))), [filter, sessions]);
+  async function book(session: CourseSession) { setBookingId(session.id); setError(null); try { await createCourseBooking(session.id); setBookedIds((current) => new Set(current).add(session.id)); } catch (caught) { setError(caught instanceof ApiError ? caught.message : "We couldn’t create this booking. Please try again."); } finally { setBookingId(null); } }
+  return <><div className="member-filter" role="group" aria-label="Filter classes">{filters.map((item) => <button key={item} type="button" className={filter === item ? "active" : undefined} aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</button>)}</div><section className="member-list-card" aria-labelledby="class-list-title"><div className="member-section-heading"><div><p className="member-kicker">Live schedule</p><h2 id="class-list-title">{filter === "All" ? "All classes" : `${filter}'s classes`}</h2></div><span>{visibleClasses.length} sessions</span></div>{error ? <p className="auth-message is-error" role="alert">{error}</p> : null}{isLoading ? <p className="member-empty-copy" aria-live="polite">Loading live classes…</p> : <div className="member-class-list">{visibleClasses.length ? visibleClasses.map((session) => { const booked = bookedIds.has(session.id); const full = session.availableSlots <= 0; return <article key={session.id} className="member-class-row"><div className="member-date-tile"><strong>{new Intl.DateTimeFormat("en-IN", { day: "numeric", timeZone: session.timezone || "Asia/Kolkata" }).format(new Date(session.startAt))}</strong><span>{new Intl.DateTimeFormat("en-IN", { month: "short", timeZone: session.timezone || "Asia/Kolkata" }).format(new Date(session.startAt))}</span></div><div className="member-class-copy"><span>{sessionDateLabel(session)} · {sessionTimeLabel(session)}</span><h3>{session.title}</h3><p>{session.instructor?.displayName ?? session.program.title} · {session.location ?? "Location TBA"}</p></div><span className={`member-status status-${booked ? "booked" : full ? "full" : "available"}`}>{booked ? "Booked" : full ? "Full" : "Available"}</span><button type="button" className="member-row-action" disabled={booked || full || bookingId === session.id} onClick={() => void book(session)}>{bookingId === session.id ? "Booking…" : booked ? "Booked" : full ? "Full" : "Book"}</button></article>; }) : <p className="member-empty-copy">No live sessions match this filter.</p>}</div>}</section></>;
 }

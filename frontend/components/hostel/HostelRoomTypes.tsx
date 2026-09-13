@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getPublicHostel, type HostelRoomType } from "@/lib/hostel-api";
 
@@ -47,7 +46,7 @@ export function HostelRoomTypes() {
       <div className="hostel-room-content">
         <p className="hostel-room-kicker">{room.description}</p><h3>{room.name}</h3>
         <ul className="hostel-room-meta"><li>Up to {room.capacity} guests</li>{room.amenities.slice(0, 2).map((amenity) => <li key={amenity}>{amenity}</li>)}</ul>
-        <div className="hostel-room-footer"><strong>{room.basePrice ? `From ${formatCurrency(room.basePrice, room.currency)} / night` : "Rates shown with availability"}</strong><Link href="#hostel-availability">Check availability</Link></div>
+        <div className="hostel-room-footer"><strong>{room.basePrice ? `From ${formatCurrency(room.basePrice, room.currency)} / night` : "Rates shown with availability"}</strong><a href="#hostel-availability">Check availability</a></div>
       </div>
     </article>)}
   </div>;

@@ -1,193 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Reveal } from "@/components/ui/Reveal";
-import { schedule, weekDays } from "@/data/schedule";
+import { ApiError } from "@/lib/api-client";
+import { createCourseBooking, getCourseBookings, getCourseSessions, sessionDateLabel, sessionTimeLabel, type CourseSession } from "@/lib/course-booking-api";
 
+const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 type DayFilter = "All" | (typeof weekDays)[number];
 type LevelFilter = "All" | "All Levels" | "Intermediate" | "Experienced";
 type TimeFilter = "All" | "Morning" | "Evening";
 
+function dayName(session: CourseSession) { return new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: session.timezone || "Asia/Kolkata" }).format(new Date(session.startAt)); }
+function levelLabel(level: CourseSession["level"]) { return level === "ALL_LEVELS" ? "All Levels" : level === "ADVANCED" ? "Experienced" : `${level.charAt(0)}${level.slice(1).toLowerCase()}`; }
+
 export function InteractiveSchedule() {
-  const [selectedDay, setSelectedDay] = useState<DayFilter>("All");
-  const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("All");
-  const [selectedTime, setSelectedTime] = useState<TimeFilter>("All");
-
-  const todayIndex = new Date().getDay();
-  // In JS: 0 is Sunday, 1 is Monday...
-  const todayName = todayIndex === 0 ? "Sunday" : weekDays[todayIndex - 1];
-
-  const filteredDays = useMemo(() => {
-    return selectedDay === "All" ? weekDays : [selectedDay];
-  }, [selectedDay]);
-
-  const filteredSchedule = useMemo(() => {
-    return schedule.filter((item) => {
-      // Day filter
-      if (selectedDay !== "All" && item.day !== selectedDay) {
-        return false;
-      }
-      // Level filter
-      if (selectedLevel !== "All" && item.level !== selectedLevel) {
-        return false;
-      }
-      // Time filter
-      if (selectedTime === "Morning") {
-        if (!item.time.includes("AM")) return false;
-      } else if (selectedTime === "Evening") {
-        if (!item.time.includes("PM")) return false;
-      }
-      return true;
-    });
-  }, [selectedDay, selectedLevel, selectedTime]);
-
-  const totalCount = filteredSchedule.length;
-  const isFiltered = selectedDay !== "All" || selectedLevel !== "All" || selectedTime !== "All";
-
-  const resetFilters = () => {
-    setSelectedDay("All");
-    setSelectedLevel("All");
-    setSelectedTime("All");
-  };
-
-  return (
-    <div className="interactive-schedule">
-      {/* Day Selector Tabs */}
-      <div className="schedule-filter-bar">
-        <div className="schedule-day-tabs" role="tablist" aria-label="Filter schedule by day">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={selectedDay === "All"}
-            className={`schedule-tab-btn ${selectedDay === "All" ? "is-active" : ""}`}
-            onClick={() => setSelectedDay("All")}
-          >
-            All Days
-          </button>
-          {weekDays.map((day) => {
-            const isToday = day === todayName;
-            return (
-              <button
-                key={day}
-                type="button"
-                role="tab"
-                aria-selected={selectedDay === day}
-                className={`schedule-tab-btn ${selectedDay === day ? "is-active" : ""}`}
-                onClick={() => setSelectedDay(day)}
-              >
-                <span>{day.slice(0, 3)}</span>
-                {isToday && <em className="today-badge">Today</em>}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Secondary Filter Chips: Level & Time of Day */}
-        <div className="schedule-chip-row">
-          <div className="schedule-chip-group">
-            <span className="filter-label">Level:</span>
-            {(["All", "All Levels", "Intermediate", "Experienced"] as const).map((level) => (
-              <button
-                key={level}
-                type="button"
-                className={`schedule-chip ${selectedLevel === level ? "is-active" : ""}`}
-                onClick={() => setSelectedLevel(level)}
-              >
-                {level === "All" ? "Any Level" : level}
-              </button>
-            ))}
-          </div>
-
-          <div className="schedule-chip-group">
-            <span className="filter-label">Time:</span>
-            {(["All", "Morning", "Evening"] as const).map((time) => (
-              <button
-                key={time}
-                type="button"
-                className={`schedule-chip ${selectedTime === time ? "is-active" : ""}`}
-                onClick={() => setSelectedTime(time)}
-              >
-                {time === "All" ? "Any Time" : `${time} Flow`}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Status Bar */}
-        <div className="schedule-status-row">
-          <span className="schedule-count">
-            Showing <strong>{totalCount}</strong> {totalCount === 1 ? "practice" : "practices"}
-            {selectedDay !== "All" ? ` for ${selectedDay}` : ""}
-            {selectedLevel !== "All" ? ` • ${selectedLevel}` : ""}
-            {selectedTime !== "All" ? ` • ${selectedTime}` : ""}
-          </span>
-          {isFiltered && (
-            <button
-              type="button"
-              className="schedule-reset-btn"
-              onClick={resetFilters}
-            >
-              Reset filters ↺
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Schedule Content */}
-      <div className="schedule-full">
-        {filteredDays.map((day) => {
-          const dayItems = filteredSchedule.filter((x) => x.day === day);
-          if (selectedDay === "All" && dayItems.length === 0 && isFiltered) {
-            return null;
-          }
-
-          return (
-            <section className="day-block" key={day}>
-              <Reveal as="div" className="day-heading">
-                <span>{day.slice(0, 3)}</span>
-                <h2>{day}</h2>
-              </Reveal>
-
-              <div>
-                {dayItems.map((x, i) => (
-                  <Reveal
-                    as="article"
-                    className="class-row"
-                    key={`${day}-${x.time}-${x.title}`}
-                    delay={i * 0.04}
-                  >
-                    <time>{x.time}</time>
-                    <div>
-                      <h3>{x.title}</h3>
-                      <span>{x.instructor}</span>
-                    </div>
-                    <span className="class-tag">{x.level}</span>
-                    <span>{x.duration}</span>
-                    <button aria-label={`Book ${x.title}`}>+</button>
-                  </Reveal>
-                ))}
-
-                {dayItems.length === 0 && (
-                  <p className="rest-day">
-                    No practices match your selection — a gentle invitation to rest or try another filter.
-                  </p>
-                )}
-              </div>
-            </section>
-          );
-        })}
-
-        {totalCount === 0 && (
-          <div className="schedule-empty-state">
-            <p className="eyebrow">NO CLASSES FOUND</p>
-            <h3>A gentle pause.</h3>
-            <p>No practices match your current filter combination.</p>
-            <button type="button" className="button button-small" onClick={resetFilters}>
-              View all practices
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  const router = useRouter(); const searchParams = useSearchParams(); const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const [sessions, setSessions] = useState<CourseSession[]>([]); const [bookedSessionIds, setBookedSessionIds] = useState<Set<string>>(new Set());
+  const [selectedDay, setSelectedDay] = useState<DayFilter>("All"); const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("All"); const [selectedTime, setSelectedTime] = useState<TimeFilter>("All");
+  const [isLoading, setIsLoading] = useState(true); const [error, setError] = useState<string | null>(null); const [notice, setNotice] = useState<string | null>(null); const [bookingId, setBookingId] = useState<string | null>(null);
+  const load = useCallback(async () => { setIsLoading(true); try { const result = await getCourseSessions(); setSessions(result.items); if (isAuthenticated) { const bookings = await getCourseBookings(); setBookedSessionIds(new Set(bookings.items.filter((booking) => booking.status === "PENDING" || booking.status === "CONFIRMED").map((booking) => booking.programSession.id))); } else setBookedSessionIds(new Set()); setError(null); } catch { setError("We couldn’t load the live schedule. Please refresh and try again."); } finally { setIsLoading(false); } }, [isAuthenticated]);
+  useEffect(() => { void load(); }, [load]);
+  const todayName = new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: "Asia/Kolkata" }).format(new Date());
+  const filteredSchedule = useMemo(() => sessions.filter((session) => { const day = dayName(session); if (selectedDay !== "All" && day !== selectedDay) return false; if (selectedLevel !== "All" && levelLabel(session.level) !== selectedLevel) return false; const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: session.timezone || "Asia/Kolkata" }).format(new Date(session.startAt))); return (selectedTime !== "Morning" || hour < 12) && (selectedTime !== "Evening" || hour >= 12); }), [selectedDay, selectedLevel, selectedTime, sessions]);
+  const isFiltered = selectedDay !== "All" || selectedLevel !== "All" || selectedTime !== "All"; const returnBookingId = searchParams.get("book");
+  function resetFilters() { setSelectedDay("All"); setSelectedLevel("All"); setSelectedTime("All"); }
+  async function book(session: CourseSession) { setError(null); setNotice(null); if (isAuthLoading) return; if (!isAuthenticated) { router.push(`/login?returnTo=${encodeURIComponent(`/schedule?book=${session.id}`)}`); return; } setBookingId(session.id); try { await createCourseBooking(session.id); setBookedSessionIds((current) => new Set(current).add(session.id)); setNotice(`${session.title} is booked. You can manage it in My bookings.`); router.replace("/schedule", { scroll: false }); } catch (caught) { if (caught instanceof ApiError && caught.status === 409) setBookedSessionIds((current) => new Set(current).add(session.id)); setError(caught instanceof ApiError ? caught.message : "We couldn’t create this booking. Please try again."); } finally { setBookingId(null); } }
+  return <div className="interactive-schedule"><div className="schedule-filter-bar"><div className="schedule-day-tabs" role="tablist" aria-label="Filter schedule by day"><button type="button" role="tab" aria-selected={selectedDay === "All"} className={`schedule-tab-btn ${selectedDay === "All" ? "is-active" : ""}`} onClick={() => setSelectedDay("All")}>All Days</button>{weekDays.map((day) => <button key={day} type="button" role="tab" aria-selected={selectedDay === day} className={`schedule-tab-btn ${selectedDay === day ? "is-active" : ""}`} onClick={() => setSelectedDay(day)}><span>{day.slice(0, 3)}</span>{day === todayName ? <em className="today-badge">Today</em> : null}</button>)}</div><div className="schedule-chip-row"><div className="schedule-chip-group"><span className="filter-label">Level:</span>{(["All", "All Levels", "Intermediate", "Experienced"] as const).map((level) => <button key={level} type="button" className={`schedule-chip ${selectedLevel === level ? "is-active" : ""}`} onClick={() => setSelectedLevel(level)}>{level === "All" ? "Any Level" : level}</button>)}</div><div className="schedule-chip-group"><span className="filter-label">Time:</span>{(["All", "Morning", "Evening"] as const).map((time) => <button key={time} type="button" className={`schedule-chip ${selectedTime === time ? "is-active" : ""}`} onClick={() => setSelectedTime(time)}>{time === "All" ? "Any Time" : `${time} Flow`}</button>)}</div></div><div className="schedule-status-row"><span className="schedule-count">Showing <strong>{filteredSchedule.length}</strong> {filteredSchedule.length === 1 ? "practice" : "practices"}</span>{isFiltered ? <button type="button" className="schedule-reset-btn" onClick={resetFilters}>Reset filters ↺</button> : null}</div></div>
+    {returnBookingId && isAuthenticated ? <p className="auth-message" aria-live="polite">Choose “Book” below to complete the class booking you started before signing in.</p> : null}{notice ? <p className="auth-message is-success" role="status">{notice}</p> : null}{error ? <p className="auth-message is-error" role="alert">{error}</p> : null}
+    {isLoading ? <p className="member-list-card" aria-live="polite">Loading live sessions…</p> : <div className="schedule-full">{weekDays.map((day) => { const dayItems = filteredSchedule.filter((session) => dayName(session) === day); if (!dayItems.length && selectedDay !== day && selectedDay !== "All") return null; if (!dayItems.length && selectedDay === "All" && isFiltered) return null; return <section className="day-block" key={day}><Reveal as="div" className="day-heading"><span>{day.slice(0, 3)}</span><h2>{day}</h2></Reveal><div>{dayItems.length ? dayItems.map((session, index) => { const isBooked = bookedSessionIds.has(session.id); const isFull = session.availableSlots <= 0; const isContinuation = returnBookingId === session.id && isAuthenticated; return <Reveal as="article" className="class-row" key={session.id} delay={index * 0.04}><time>{sessionTimeLabel(session)}</time><div><h3>{session.title}</h3><span>{session.instructor?.displayName ?? session.program.title} · {sessionDateLabel(session)}</span></div><span className="class-tag">{levelLabel(session.level)}</span><span>{isFull ? "Full" : `${session.availableSlots} spots`}</span><button type="button" aria-label={`${isBooked ? "Booked" : "Book"} ${session.title}`} onClick={() => void book(session)} disabled={isBooked || isFull || bookingId === session.id}>{bookingId === session.id ? "…" : isBooked ? "✓" : isContinuation ? "Book" : "+"}</button></Reveal>; }) : <p className="rest-day">No live practices match your current filter.</p>}</div></section>; })}{!filteredSchedule.length ? <div className="schedule-empty-state"><p className="eyebrow">NO LIVE CLASSES</p><h3>A gentle pause.</h3><p>There are no bookable sessions available right now.</p>{isFiltered ? <button type="button" className="button button-small" onClick={resetFilters}>View all practices</button> : null}</div> : null}</div>}
+  </div>;
 }
