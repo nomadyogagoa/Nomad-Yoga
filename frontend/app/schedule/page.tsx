@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PageHero } from '@/components/shared/PageHero';
@@ -16,7 +17,9 @@ export default function SchedulePage() {
         />
         <section className="section">
           <div className="container">
-            <InteractiveSchedule />
+            <Suspense fallback={<p className="member-list-card" aria-live="polite">Loading live sessions…</p>}>
+              <InteractiveSchedule />
+            </Suspense>
           </div>
         </section>
       </main>
