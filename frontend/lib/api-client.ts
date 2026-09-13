@@ -1,3 +1,5 @@
+import { ApiBaseConfigurationError, publicApiUrl } from "@/lib/api-url";
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number, public readonly code?: string) {
     super(message);
@@ -12,10 +14,14 @@ function codeFrom(response: unknown): string | undefined {
 let accessToken: string | null = null;
 
 function apiUrl(path: string): string {
-  const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-  if (!configuredUrl) throw new ApiError("The service is unavailable.", 503);
-  const baseUrl = configuredUrl.endsWith("/api/v1") ? configuredUrl : `${configuredUrl}/api/v1`;
-  return `${baseUrl}${path.replace(/^\/api\/v1/, "")}`;
+  try {
+    return publicApiUrl(path);
+  } catch (error) {
+    if (error instanceof ApiBaseConfigurationError) {
+      throw new ApiError(error.message, 503, "API_URL_NOT_CONFIGURED");
+    }
+    throw error;
+  }
 }
 
 function messageFrom(response: unknown): string {

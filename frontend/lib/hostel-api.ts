@@ -1,3 +1,5 @@
+import { ApiBaseConfigurationError, publicApiUrl } from "@/lib/api-url";
+
 export type HostelRoomType = {
   id: string;
   name: string;
@@ -42,10 +44,12 @@ export type HostelBooking = { id: string; bookingNumber: string; checkInDate: st
 export type HostelBookingPage = { items: HostelBooking[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
 
 function apiUrl(path: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-  if (!baseUrl) throw new Error("HOSTEL_API_NOT_CONFIGURED");
-  const apiBaseUrl = baseUrl.endsWith("/api/v1") ? baseUrl : `${baseUrl}/api/v1`;
-  return `${apiBaseUrl}${path.replace(/^\/api\/v1/, "")}`;
+  try {
+    return publicApiUrl(path);
+  } catch (error) {
+    if (error instanceof ApiBaseConfigurationError) throw new Error("HOSTEL_API_NOT_CONFIGURED");
+    throw error;
+  }
 }
 
 async function publicRequest<T>(path: string, init?: RequestInit): Promise<T> {

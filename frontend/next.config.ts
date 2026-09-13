@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { assertApiBaseNormalization } from "./lib/api-url";
+
+assertApiBaseNormalization();
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
