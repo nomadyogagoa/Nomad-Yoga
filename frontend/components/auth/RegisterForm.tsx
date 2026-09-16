@@ -8,6 +8,7 @@ import { ResendVerificationForm } from "@/components/auth/ResendVerificationForm
 
 export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
@@ -16,6 +17,7 @@ export function RegisterForm() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setErrorCode(null);
     setSuccess(null);
     const form = new FormData(event.currentTarget);
     setIsSubmitting(true);
@@ -26,6 +28,7 @@ export function RegisterForm() {
       setRegisteredEmail(email);
       event.currentTarget.reset();
     } catch (caught) {
+      setErrorCode(caught instanceof ApiError ? caught.code ?? null : null);
       if (caught instanceof ApiError && (caught.code === "EMAIL_ALREADY_REGISTERED" || caught.status === 409)) {
         setError("An account with this email already exists. Try signing in instead.");
       } else {
@@ -42,7 +45,7 @@ export function RegisterForm() {
     <label>Password<input name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" minLength={8} placeholder="Create a password" required /></label>
     <label className="checkbox"><input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />Show password</label>
     <p className="auth-form-note">Use at least 8 characters with uppercase, lowercase and a number.</p>
-    {error ? <p className="auth-message is-error" role="alert">{error}{error.includes("already exists") ? <> <Link href="/login">Sign in</Link></> : null}</p> : null}
+    {error ? <p className="auth-message is-error" role="alert" data-error-code={errorCode ?? undefined}>{error}{error.includes("already exists") ? <> <Link href="/login">Sign in</Link></> : null}</p> : null}
     {success ? <p className="auth-message is-success" role="status">{success}</p> : null}
     <button className="button auth-button" type="submit" disabled={isSubmitting}>{isSubmitting ? "Creating account…" : "Create account"}</button>
     <p className="auth-switch">Already a member? <Link href="/login">Sign in</Link></p>

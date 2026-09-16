@@ -23,7 +23,10 @@ export const metadata: Metadata = {
 import { OrganicTexture } from "@/components/ui/OrganicTexture";
 
 export const viewport: Viewport = {
-  themeColor: "#191919",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B1118" },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
