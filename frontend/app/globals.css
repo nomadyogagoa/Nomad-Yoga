@@ -13,8 +13,8 @@
   --nomad-teal-light: #4DD9E6;
   --nomad-hover: #3A6B63;
   --nomad-hover-light: #4FA395;
-  --nomad-action: #176BE0;
-  --nomad-action-hover: #1255B3;
+  --nomad-action: #2eb7c2;
+  --nomad-action-hover: #228890;
   --nomad-midnight: #0D1B2B;
 
   /* Light Mode Theme Defaults */
@@ -770,6 +770,8 @@ a,button { transition: color .25s ease, background .25s ease, border-color .25s 
    turquoise #2EB7C2, ink #0d141a, action blue #176BE0 and hover #3A6B63. */
 .brand-logo { width: 52px; height: 52px; flex: 0 0 auto; }
 .brand-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.site-header .brand-logo img { filter: brightness(0) invert(1); transition: opacity .2s var(--ease); }
+.site-header .brand-logo:hover img { opacity: .85; }
 .footer { background: var(--nomad-teal); border-top: 0; color: #ffffff; }
 .footer .brand-logo { width: 64px; height: 64px; padding: 5px; border-radius: 50%; background: #ffffff; }
 .footer .brand, .footer h4, .footer p, .footer-grid > div:not(.footer-brand) > a, .footer-bottom { color: #ffffff; }
