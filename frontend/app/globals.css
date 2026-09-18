@@ -1158,7 +1158,7 @@ a,button { transition: color .25s ease, background .25s ease, border-color .25s 
   text-transform: uppercase;
 }
 @media (max-width: 860px) {
-  .site-header, .site-header.is-scrolled { background: var(--header-bg-scrolled); }
+  .site-header, .site-header.is-scrolled { background: #2eb7c2 }
   .menu-button span { background: var(--header-text); }
   .mobile-nav { background: var(--header-bg-scrolled); border-top-color: var(--header-border); color: var(--header-text); }
   .mobile-nav a:not(.button) { color: var(--header-nav-link); }
