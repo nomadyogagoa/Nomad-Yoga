@@ -148,7 +148,7 @@ h2 em, h1 em { color: var(--nomad-action); font-weight: 500; }
 .button-outline:hover { color: white; }
 .button-light { background: var(--nomad-surface); color: var(--nomad-ink); border-color: var(--line); }
 .site-header { position: fixed; inset: 0 0 auto; z-index: 50; background: var(--header-bg); border-bottom: 1px solid var(--header-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: background .4s var(--ease), box-shadow .4s var(--ease), border-color .4s var(--ease); }
-.site-header.is-scrolled { background: var(--header-bg-scrolled); box-shadow: 0 12px 32px rgba(13, 20, 26, .16); border-bottom-color: var(--header-border); }
+.site-header.is-scrolled { background:#2eb7c2; box-shadow: 0 12px 32px rgba(13, 20, 26, .16); border-bottom-color: var(--header-border); }
 .site-header.is-scrolled .nav-shell { height: 68px; }
 .nav-shell { width: min(1240px, calc(100% - 48px)); height: 82px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 28px; transition: height .4s var(--ease); }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-playfair), Georgia, serif; font-weight: 700; font-size: 22px; color: var(--header-text); }

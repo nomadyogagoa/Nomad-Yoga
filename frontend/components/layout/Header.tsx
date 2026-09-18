@@ -5,7 +5,7 @@ import Link from "next/link";
 import { featureFlags, siteConfig } from "@/config/site";
 import { SocialLinks } from "@/components/shared/SocialLinks";
 const navItems = [
-  ["Home", "/", true], ["About", "/about", true], ["Hostel", "/hostel", true], ["Programs", "/programs", featureFlags.programs], ["Reiki", "/reiki", true], ["Schedule", "/schedule", featureFlags.schedule],
+  ["Home", "/", true], ["About", "/about", true], ["Hostel", "/hostel", true], ["Yoga", "/programs", featureFlags.programs], ["Reiki", "/reiki", true], ["Schedule", "/schedule", featureFlags.schedule],
   ["Instructors", "/instructors", featureFlags.instructors], ["Pricing", "/pricing", featureFlags.pricing], ["Gallery", "/gallery", featureFlags.gallery], ["Newsletter", "/newsletter", true], ["Shop", "/shop", true]
 ] as const;
 export function Header(){
